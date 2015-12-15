@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.net.URL;
 
 import javax.print.attribute.standard.Media;
@@ -24,6 +25,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.FOAF;
 import org.openrdf.model.vocabulary.RDF;
@@ -36,12 +38,16 @@ import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.http.HTTPRepository;
+import org.openrdf.repository.sparql.SPARQLRepository;
 
 import com.google.gson.Gson;
 
 @Path("/")
 public class RestService {
+	static HashMap<String, Double> map = new HashMap<String, Double>();
+	static ArrayList<Skill> listOfSkill = new ArrayList<>();
 	
+
 	@POST
 	@Path("/RestService")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -61,15 +67,15 @@ public class RestService {
 		// return HTTP response 200 in case of success
 		return Response.status(200).entity(crunchifyBuilder.toString()).build();
 	}
-	
+
 	@POST
 	@Path("/spotlight")
 	@Produces(MediaType.APPLICATION_ATOM_XML)
 	public Response getAnnotations(InputStream incomingData) throws ClientProtocolException, IOException {
-		
+
 		String url = "http://spotlight.dbpedia.org/rest/annotate?text=President%20Michelle%20Obama%20called%20Thursday%20on%20Congress%20"+
-		"to%20extend%20a%20tax%20break%20for%20students%20included%20in%20last%20year%27s%20economic%20stimulus%20package,%20arguing%20"+
-		"that%20the%20policy%20provides%20more%20generous%20assistance.&confidence=0.2&support=20";
+				"to%20extend%20a%20tax%20break%20for%20students%20included%20in%20last%20year%27s%20economic%20stimulus%20package,%20arguing%20"+
+				"that%20the%20policy%20provides%20more%20generous%20assistance.&confidence=0.2&support=20";
 		System.out.println("spotligth lauched");
 		//return HTTP response 200 in case of success
 		HttpClient client = new DefaultHttpClient();
@@ -80,7 +86,7 @@ public class RestService {
 		System.out.println("spotligth lauched3");
 
 		//convert the json string back to object
-		
+
 		BufferedReader rd = new BufferedReader (new InputStreamReader(response.getEntity().getContent()));
 		String line = "";
 		String result="";
@@ -88,7 +94,7 @@ public class RestService {
 			result+=line;
 			System.out.println(line);
 		}
-		
+
 		return Response.status(200).entity(result).build();
 
 		/*Gson gson = new Gson();
@@ -102,12 +108,12 @@ public class RestService {
 		System.out.println(skills.size());
 
 		ResponseLabel test= new ResponseLabel(skills);
-		
+
 		String test2 = gson.toJson(test);
 		System.out.println(test2);
 		return Response.status(200).entity(test2).build();
-		
-		*/
+
+		 */
 
 		//return HTTP response 200 in case of success
 		//return "Hey";
@@ -206,7 +212,7 @@ public class RestService {
 		HttpGet request = new HttpGet(url);
 		HttpResponse response = client.execute(request);
 		//convert the json string back to object
-		
+
 		BufferedReader rd = new BufferedReader (new InputStreamReader(response.getEntity().getContent()));
 		String line = "";
 		String result="";
@@ -214,8 +220,8 @@ public class RestService {
 			result+=line;
 			System.out.println(line);
 		}
-		
-		
+
+
 		Gson gson = new Gson();
 		RequestLabel obj = gson.fromJson(result, RequestLabel.class);
 		System.out.println(obj.getQuery());
@@ -227,49 +233,24 @@ public class RestService {
 		System.out.println(skills.size());
 
 		ResponseLabel test= new ResponseLabel(skills);
-		
+
 		String test2 = gson.toJson(test);
 		System.out.println(test2);
 		return Response.status(200).entity(test2).build();
 	}
+
 	
 	@GET
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response listLabelsRelated(@QueryParam("foo") String id) throws IOException {
-		System.out.println(id);
-
-		String url = "http://sisinflab.poliba.it/led/api/get/tags?q="+id+"&limit=15&key=8d092ae3&format=json";
-		System.out.println(url);
-		// return HTTP response 200 in case of success
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet(url);
-		HttpResponse response = client.execute(request);
-		//convert the json string back to object
-		
-		BufferedReader rd = new BufferedReader (new InputStreamReader(response.getEntity().getContent()));
-		String line = "";
-		String result="";
-		while ((line = rd.readLine()) != null) {
-			result+=line;
-			System.out.println(line);
+	public Response listTags(@QueryParam("skill") String id) throws IOException {
+		ArrayList<Skill> finalList = Test.getSkillsRelated("http://dbpedia.org/resource/"+id, "0", 1, 1);
+		ArrayList<Tag> finalTags = new ArrayList<>();
+		for(int i=0; i<finalList.size(); i++){
+			Tag tg= new Tag(finalList.get(i).getName());
+			finalTags.add(tg);
 		}
-		
-		Gson gson = new Gson();
-		RequestLabel obj = gson.fromJson(result, RequestLabel.class);
-		System.out.println(obj.getQuery());
-		ArrayList<String> skills = new ArrayList<String>();
-		for(int i=0; i<obj.getResults().size(); i++){
-			skills.add(obj.getResults().get(i).getLabel());
-			System.out.println(obj.getResults().get(i).getLabel());
-		}
-		System.out.println(skills.size());
-
-		ResponseLabel test= new ResponseLabel(skills);
-		
-		String test2 = gson.toJson(test);
-		System.out.println(test2);
-		return Response.status(200).entity(test2).build();
+		return Response.status(200).entity(finalTags).build();
 	}
 
 	@GET
@@ -308,5 +289,7 @@ public class RestService {
 		}
 		return Response.status(200).entity(listpersons).build();
 	}
+
+
 
 }

@@ -53,7 +53,7 @@ public class PDFReader{
  	}
  	public static void main(String args[]){
  		//System.out.println(pdftoText("CFC.pdf"));
- 		System.out.println(pdftoText("/Users/paulineboukhaled/Documents/workspace/SampleOCRRESTProjectJAVA/OCRWebServiceREST.Client/dataset/cvs/DianaAffi.pdf"));
+ 		System.out.println(pdftoText("cv.pdf"));
 
  	}
 }
