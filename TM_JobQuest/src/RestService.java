@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.net.URL;
 
 import javax.print.attribute.standard.Media;
@@ -39,14 +40,16 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.http.HTTPRepository;
 import org.openrdf.repository.sparql.SPARQLRepository;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
+import ch.qos.logback.classic.LoggerContext;
+
 @Path("/")
 public class RestService {
-	static HashMap<String, Double> map = new HashMap<String, Double>();
-	static ArrayList<Skill> listOfSkill = new ArrayList<>();
-	
+	static final int NUMBER_OF_TAGS = 10;
+
 
 	@POST
 	@Path("/RestService")
@@ -239,17 +242,36 @@ public class RestService {
 		return Response.status(200).entity(test2).build();
 	}
 
-	
+
 	@GET
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response listTags(@QueryParam("skill") String id) throws IOException {
-		ArrayList<Skill> finalList = Test.getSkillsRelated("http://dbpedia.org/resource/"+id, "0", 1, 1);
-		ArrayList<Tag> finalTags = new ArrayList<>();
-		for(int i=0; i<finalList.size(); i++){
-			Tag tg= new Tag(finalList.get(i).getName());
-			finalTags.add(tg);
+	public Response listTags(@QueryParam("skill") String id) throws IOException {		
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		loggerContext.stop();
+		Test.map.put("Java", 1.0);
+		Test.getSkillsRelated("http://dbpedia.org/resource/Java_(programming_language)", "0", 2, 1);
+		for (String mapKey : Test.map.keySet()) {
+			System.out.println(mapKey+" a "+ Test.map.get(mapKey));
 		}
+
+		Test.ValueComparator comparateur = new Test.ValueComparator(Test.map);
+		TreeMap<String,Double> mapTriee = new TreeMap<String,Double>(comparateur);
+		mapTriee.putAll(Test.map);
+		ArrayList<Tag> finalTags = new ArrayList<>();
+		int count = 0;
+		for (String mapKey : mapTriee.keySet()) {
+			if(count<mapTriee.size() && count<NUMBER_OF_TAGS){
+				count++;
+				Tag tg= new Tag(mapKey);
+				finalTags.add(tg);
+			}
+		}
+
+
+		System.out.println("resultat du tri: "+ mapTriee);
+
+
 		return Response.status(200).entity(finalTags).build();
 	}
 

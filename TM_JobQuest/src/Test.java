@@ -1,6 +1,9 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
@@ -16,6 +19,9 @@ import ch.qos.logback.classic.LoggerContext;
 public class Test {
 	static HashMap<String, Double> map = new HashMap<String, Double>();
 	static ArrayList<Skill> listOfSkill = new ArrayList<>();
+	static final int MAX_RESULT = 200;
+	static final int LEVEL = 6;
+
 	static int count = 0;
 
 
@@ -39,7 +45,7 @@ public class Test {
 			if(!result.hasNext()){
 				hasResult=false;
 			}
-			while(result.hasNext() && count<30) {
+			while(result.hasNext() && count<MAX_RESULT) {
 				count++;
 				BindingSet bs = result.next();
 				Value uri = bs.getValue("languages");
@@ -52,7 +58,7 @@ public class Test {
 					listTemp.get(i).setWeight((1.0/listTemp.size())*value);
 					//System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+listTemp.get(i).getWeight()+" SIZE:"+listTemp.size()+" value:"+value);
 					if(map.containsKey(listTemp.get(i).getName())){
-						System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+listTemp.get(i).getWeight()+" SIZE:"+listTemp.size()+" value:"+value);
+						System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 						map.put(listTemp.get(i).getName(), map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 					}else{
 						map.put(listTemp.get(i).getName(), listTemp.get(i).getWeight());
@@ -76,20 +82,34 @@ public class Test {
 		return listOfSkill;
 	}
 
+	static class ValueComparator implements Comparator<String> {
+		Map<String, Double> base;
+		
+		public ValueComparator(Map<String, Double> base) {
+			this.base = base;
+		}
+
+		public int compare(String a, String b) {
+			if (base.get(a) >= base.get(b)) {
+				return -1;
+			} else {
+				return 1;
+			} 
+		}
+	}
+
 	public static void main(String[] args) {
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		loggerContext.stop();
-		ArrayList<Skill> finalList =  getSkillsRelated("http://dbpedia.org/resource/Java_(programming_language)", "0", 2, 1);
-		map.put("Java_(programming_language)", 1.0);
-		/*for(int i=0; i<finalList.size(); i++){
-			if(map.containsKey(finalList.get(i).getName())){
-				map.put(finalList.get(i).getName(), map.get(finalList.get(i).getName())+finalList.get(i).getWeight());
-			}else{
-				map.put(finalList.get(i).getName(), finalList.get(i).getWeight());
-			}
-		}*/
+		map.put("Java", 1.0);
+		ArrayList<Skill> finalList =  getSkillsRelated("http://dbpedia.org/resource/Java_(programming_language)", "0", LEVEL, 1);
 		for (String mapKey : map.keySet()) {
 			System.out.println(mapKey+" a "+ map.get(mapKey));
 		}
+
+		ValueComparator comparateur = new ValueComparator(map);
+		TreeMap<String,Double> mapTriee = new TreeMap<String,Double>(comparateur);
+		mapTriee.putAll(map);
+		System.out.println("resultat du tri: "+ mapTriee);
 	}
 }
