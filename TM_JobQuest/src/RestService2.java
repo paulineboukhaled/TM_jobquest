@@ -52,8 +52,8 @@ import com.google.gson.Gson;
 
 import ch.qos.logback.classic.LoggerContext;
 
-@Path("/a")
-public class RestService {
+@Path("/b")
+public class RestService2 {
 	static final int NUMBER_OF_TAGS = 10;
 
 	
@@ -83,7 +83,10 @@ public class RestService {
 	@Path("/spotlight")
 	@Produces(MediaType.APPLICATION_ATOM_XML)
 	public Response getAnnotations(InputStream incomingData) throws ClientProtocolException, IOException {
-		String url = "http://spotlight.sztaki.hu:2222/rest/annotate?text=Michelle%20Obama%20called%20Thursday%20on%20Congress%20to%20extend%20a%20tax%20break%20for%20students%20included%20in%20last%20year%27s%20economic%20stimulus%20package,%20arguing%20that%20the%20policy%20provides%20more%20generous%20assistance.&confidence=0.2&support=20";
+
+		String url = "http://spotlight.dbpedia.org/rest/annotate?text=President%20Michelle%20Obama%20called%20Thursday%20on%20Congress%20"+
+				"to%20extend%20a%20tax%20break%20for%20students%20included%20in%20last%20year%27s%20economic%20stimulus%20package,%20arguing%20"+
+				"that%20the%20policy%20provides%20more%20generous%20assistance.&confidence=0.2&support=20";
 		System.out.println("spotligth lauched");
 		//return HTTP response 200 in case of success
 		HttpClient client = new DefaultHttpClient();
@@ -124,7 +127,7 @@ public class RestService {
 		 */
 
 		//return HTTP response 200 in case of success
-		//return null;
+		//return "Hey";
 	}
 
 	@POST

@@ -1,3 +1,4 @@
+package upload;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,7 +8,7 @@ import org.apache.pdfbox.io.RandomAccessRead;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
-public class PDFReader{
+public class TextExtractor{
     
  // Extract text from PDF Document
  	public static String pdftoText(String fileName) {
