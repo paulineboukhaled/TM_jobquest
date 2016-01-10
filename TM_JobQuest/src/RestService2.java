@@ -258,15 +258,15 @@ public class RestService2 {
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		loggerContext.stop();
 		System.out.println(id);
-		Test.map.put(id, 1.0);
-		Test.getInfluencedBy("http://dbpedia.org/resource/"+id, "0", Test.LEVEL, 1);
-		for (String mapKey : Test.map.keySet()) {
-			System.out.println(mapKey+" a "+ Test.map.get(mapKey));
+		SkillsWeight.map.put(id, 1.0);
+		SkillsWeight.getInfluencedBy("http://dbpedia.org/resource/"+id, "0", SkillsWeight.LEVEL, 1);
+		for (String mapKey : SkillsWeight.map.keySet()) {
+			System.out.println(mapKey+" a "+ SkillsWeight.map.get(mapKey));
 		}
 
-		Test.ValueComparator comparateur = new Test.ValueComparator(Test.map);
+		SkillsWeight.ValueComparator comparateur = new SkillsWeight.ValueComparator(SkillsWeight.map);
 		TreeMap<String,Double> mapTriee = new TreeMap<String,Double>(comparateur);
-		mapTriee.putAll(Test.map);
+		mapTriee.putAll(SkillsWeight.map);
 		ArrayList<Tag> finalTags = new ArrayList<>();
 		int count = 0;
 		for (String mapKey : mapTriee.keySet()) {

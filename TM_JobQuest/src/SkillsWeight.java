@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Dictionary;
@@ -15,8 +16,9 @@ import org.openrdf.repository.sparql.SPARQLRepository;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;
+import upload.UploadPDF;
 
-public class Test {
+public class SkillsWeight {
 	static HashMap<String, Double> map = new HashMap<String, Double>();
 	static ArrayList<Skill> listOfSkill = new ArrayList<>();
 	static final int MAX_RESULT = 50;
@@ -25,6 +27,21 @@ public class Test {
 	static int count = 0;
 
 //	static HashMap<String, ObjDBPEDIA>
+	
+	
+	public static HashMap<String, Double> getAllSkillsWeight(ArrayList<Skill> listOfSkills){
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		loggerContext.stop();		
+		for(Skill s : listOfSkills){
+			System.out.println(s.getName());
+			map.put(s.getName(), 1.0);
+			getInfluencedBy("http://dbpedia.org/resource/"+s.getName(), "0", LEVEL, 1);
+			getInfluenced("http://dbpedia.org/resource/"+s.getName(), "0", LEVEL, 1);
+			getParadigm("http://dbpedia.org/resource/"+s.getName(), "0", LEVEL, 1);	
+		}
+		return map;			
+	}
+
 
 	public static ArrayList<Skill> getInfluencedBy(String URI, String URIParent, int level, double value){
 		count = 0;
@@ -57,7 +74,7 @@ public class Test {
 				for(int i=0; i<listTemp.size(); i++){
 					listTemp.get(i).setWeight((1.0/listTemp.size())*value);
 					if(map.containsKey(listTemp.get(i).getName())){
-						System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
+						//System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 						map.put(listTemp.get(i).getName(), map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 					}else{
 						map.put(listTemp.get(i).getName(), listTemp.get(i).getWeight());
@@ -119,7 +136,7 @@ public class Test {
 				for(int i=0; i<listTemp.size(); i++){
 					listTemp.get(i).setWeight((1.0/listTemp.size())*value);
 					if(map.containsKey(listTemp.get(i).getName())){
-						System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
+						//System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 						map.put(listTemp.get(i).getName(), map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 					}else{
 						map.put(listTemp.get(i).getName(), listTemp.get(i).getWeight());
@@ -181,7 +198,7 @@ public class Test {
 				for(int i=0; i<listTemp.size(); i++){
 					listTemp.get(i).setWeight((1.0/listTemp.size())*value);
 					if(map.containsKey(listTemp.get(i).getName())){
-						System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
+						//System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 						map.put(listTemp.get(i).getName(), map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 					}else{
 						map.put(listTemp.get(i).getName(), listTemp.get(i).getWeight());
@@ -226,8 +243,74 @@ public class Test {
 			} 
 		}
 	}
+	
+	static class ValueComparator2 implements Comparator<String> {
+		Map<String, Long> base;
+		
+		public ValueComparator2(Map<String, Long> base) {
+			this.base = base;
+		}
 
-	public static void main(String[] args) {
+		public int compare(String a, String b) {
+			if (base.get(a) >= base.get(b)) {
+				return -1;
+			} else {
+				return 1;
+			} 
+		}
+	}
+	
+	
+	public static void main(String[] args) throws Exception {
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		loggerContext.stop();
+		
+		File cv = new File("cv.pdf");
+	    System.out.println(cv.getAbsolutePath()); 
+		HashMap<String, Long> tempMap = UploadPDF.getHashMapAttachedFiles(cv);
+		
+		
+		// TRI DE LA MAP
+		ValueComparator2 comparateur2 = new ValueComparator2(tempMap);
+		TreeMap<String,Long> mapTriee2 = new TreeMap<String,Long>(comparateur2);
+		mapTriee2.putAll(tempMap);
+		System.out.println("resultat du tri: "+ mapTriee2);
+		
+		Skill java = new Skill("Java_(programming_language)", 3, 2, 0, null);
+		//Skill mysql = new Skill("MySQL", 3, 2, 0, null);
+		//Skill c = new Skill("C_(programming_language)", 3, 2, 0, null);
+		ArrayList<Skill> temp = new ArrayList<>();
+		temp.add(java);
+		//temp.add(c);
+		//temp.add(mysql);
+				
+		for (String mapKey : getAllSkillsWeight(temp).keySet()) {
+			//System.out.println(mapKey+" a "+ map.get(mapKey));
+		}
+
+		for(String key : tempMap.keySet()){
+			if(map.containsKey(key)){
+				System.out.println("Même élément: "+key);
+				map.put(key, map.get(key)+tempMap.get(key));
+			}else{
+				map.put(key, (double)tempMap.get(key));
+
+			}
+			
+		}
+		
+		// TRI DE LA MAP
+		ValueComparator comparateur = new ValueComparator(map);
+		TreeMap<String,Double> mapTriee = new TreeMap<String,Double>(comparateur);
+		mapTriee.putAll(map);
+		System.out.println("resultat du tri: "+ mapTriee);
+		
+	}
+
+	/**
+	 * @param args
+	 */
+	/*public static void main(String[] args) {
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		loggerContext.stop();
 		map.put("Java", 1.0);
@@ -245,5 +328,5 @@ public class Test {
 		TreeMap<String,Double> mapTriee = new TreeMap<String,Double>(comparateur);
 		mapTriee.putAll(map);
 		System.out.println("resultat du tri: "+ mapTriee);
-	}
+	}*/
 }

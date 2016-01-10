@@ -9,8 +9,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -41,9 +46,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import ch.qos.logback.core.net.SyslogOutputStream;
 
 /**
  * Servlet implementation class UploadPDF
@@ -52,14 +60,33 @@ import com.google.gson.JsonParser;
 public class UploadPDF extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private ServletFileUpload uploader = null;
+	private static HashMap<String, Long> frequency= new HashMap<>() ;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UploadPDF() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public UploadPDF() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+	
+	static class ValueComparator implements Comparator<String> {
+		Map<String, Long> base;
+		
+		public ValueComparator(Map<String, Long> base) {
+			this.base = base;
+		}
+
+		public int compare(String a, String b) {
+			if (base.get(a) >= base.get(b)) {
+				return -1;
+			} else {
+				return 1;
+			} 
+		}
+	}
 
 	/**
 	 * @see Servlet#init(ServletConfig)
@@ -87,6 +114,7 @@ public class UploadPDF extends HttpServlet {
 			throw new ServletException("Content type is not multipart/form-data");
 		}
 
+		ArrayList<String> keywords = new ArrayList<>();
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		out.write("<html><head></head><body>");
@@ -99,52 +127,119 @@ public class UploadPDF extends HttpServlet {
 				System.out.println("FileName="+fileItem.getName());
 				System.out.println("ContentType="+fileItem.getContentType());
 				System.out.println("Size in bytes="+fileItem.getSize());
+				if(fileItem.getContentType()!=null && fileItem.getFieldName()!=null){
 
-				File file = new File("./"+File.separator+fileItem.getName());
-				//System.out.println(TextExtractor.pdftoText(file.getPath()));
-				//String cat = TextExtractor.pdftoText(file.getPath());
-				String cat2 = OCRRestAPI.pdfToTxt(file.getPath());
-				System.out.println(cat2);
-				//JsonParser parser = new JsonParser();
-				//JsonObject o = parser.parse(cat2).getAsJsonObject();
-				//JsonElement jsonObject = o.get("OCRText");
+					File file = new File("./"+File.separator+fileItem.getName());
+					String cat2 = OCRRestAPI.pdfToTxt(file.getPath());
 
-				//String url = "http://spotlight.sztaki.hu:2222/rest/annotate?text="+jsonObject.getString("OCRText")+"&confidence=0.2&support=20";
-	
-				//String url = "http://spotlight.sztaki.hu:2222/rest/annotate?text="+cat2+"&confidence=0.2&support=20";
+					Gson gson = new GsonBuilder().create();
+					ResponseOCR ocr = gson.fromJson(cat2, ResponseOCR.class);
+					System.out.println(ocr.getOCRText());
+					int i = 0;
+					for (List<String> v : ocr.getOCRText()){
+						for(String j : v){
+							String x = j.replaceAll("[^A-Za-z0-9 ]","");
+							x = x.replaceAll("\\s", "%20");
+							String url = "http://spotlight.sztaki.hu:2222/rest/annotate?text="+x+"&confidence=0.2&support=20";
+							HttpClient client = new DefaultHttpClient();
+							HttpGet request2 = new HttpGet(url);
+							request2.addHeader("accept", "application/json");
+							HttpResponse response2 = client.execute(request2);
+							int code = response2.getStatusLine().getStatusCode();
+							if(code==200){
+								BufferedReader rd = new BufferedReader (new InputStreamReader(response2.getEntity().getContent()));
+								String line = "";
+								String result="";
+								while ((line = rd.readLine()) != null) {
+									result+=line;
+								}
+								gson = new GsonBuilder().create();
+								ResponseSpotlight resultSpotlight = gson.fromJson(result, ResponseSpotlight.class);
+								for(ResponseSpotlight.Resource r : resultSpotlight.getResources()){
+									String uri = r.getURI();
+									uri = uri.replace("http://dbpedia.org/resource/", "");
+									uri = uri.replace("_", " ");
+									keywords.add(uri);
+									if(frequency.containsKey(uri)){
+										frequency.put(uri, frequency.get(uri)+1);
+									}else{
+										frequency.put(uri, (long) 1);
+									}
+								}
+							}
+						}
+					}
+				}
 				
-				/*System.out.println("spotligth lauched:"+ url);
-				//return HTTP response 200 in case of success
-				HttpClient client = new DefaultHttpClient();
-				HttpGet request2 = new HttpGet(url);
-				request2.addHeader("accept", "application/json");
-				HttpResponse response2 = client.execute(request2);
-
-				//convert the json string back to object
-				System.out.println("Absolute Path at server="+file.getAbsolutePath());
-
-				BufferedReader rd = new BufferedReader (new InputStreamReader(response2.getEntity().getContent()));
-				String line = "";
-				String result="";
-				while ((line = rd.readLine()) != null) {
-					result+=line;
-					System.out.println(line);
-					out.write(line);
-
-				}*/
-				
-				fileItem.write(file);
+				// TRI DE LA MAP
+				ValueComparator comparateur = new ValueComparator(frequency);
+				TreeMap<String,Long> mapTriee = new TreeMap<String,Long>(comparateur);
+				mapTriee.putAll(frequency);
+				System.out.println("resultat du tri: "+ mapTriee);
+				//fileItem.write(file);
 				out.write("File "+fileItem.getName()+ " uploaded successfully.");
-				//out.write("Le contenu est :"+cat2);
 				out.write("<br>");
 				out.write("<a href=\"UploadDownloadFileServlet?fileName="+fileItem.getName()+"\">Download "+fileItem.getName()+"</a>");
 			}
 		} catch (FileUploadException e) {
-			out.write("Exception in uploading file.");
+			out.write("Exception in file uploading file.");
 		} catch (Exception e) {
 			out.write("Exception in uploading file.");
+			e.printStackTrace();
 		}
 		out.write("</body></html>");
+	}
+	
+	public static HashMap<String, Long> getHashMapAttachedFiles(File file) throws Exception {
+		String cat2 = OCRRestAPI.pdfToTxt(file.getPath());
+		Gson gson = new GsonBuilder().create();
+		ResponseOCR ocr = gson.fromJson(cat2, ResponseOCR.class);
+		System.out.println(ocr.getOCRText());
+		int i = 0;
+		ArrayList<String> keywords = new ArrayList<>();
+		for (List<String> v : ocr.getOCRText()){
+			for(String j : v){
+				String x = j.replaceAll("[^A-Za-z0-9 ]","");
+				x = x.replaceAll("\\s", "%20");
+				String url = "http://spotlight.sztaki.hu:2222/rest/annotate?text="+x+"&confidence=0.2&support=20";
+				HttpClient client = new DefaultHttpClient();
+				HttpGet request2 = new HttpGet(url);
+				request2.addHeader("accept", "application/json");
+				HttpResponse response2 = client.execute(request2);
+				int code = response2.getStatusLine().getStatusCode();
+				if(code==200){
+					BufferedReader rd = new BufferedReader (new InputStreamReader(response2.getEntity().getContent()));
+					String line = "";
+					String result="";
+					while ((line = rd.readLine()) != null) {
+						result+=line;
+					}
+					gson = new GsonBuilder().create();
+					ResponseSpotlight resultSpotlight = gson.fromJson(result, ResponseSpotlight.class);
+					for(ResponseSpotlight.Resource r : resultSpotlight.getResources()){
+						String uri = r.getURI();
+						uri = uri.replace("http://dbpedia.org/resource/", "");
+						uri = uri.replace("_", " ");
+						keywords.add(uri);
+						if(frequency.containsKey(uri)){
+							frequency.put(uri, frequency.get(uri)+1);
+						}else{
+							frequency.put(uri, (long) 1);
+						}
+					}
+				}
+			}
+		getFrequency();
+		}
+		return frequency;
+	}
+	
+	public static HashMap<String, Long> getFrequency() {
+		return frequency;
+	}
+
+	public static void setFrequency(HashMap<String, Long> frequency) {
+		UploadPDF.frequency = frequency;
 	}
 
 }

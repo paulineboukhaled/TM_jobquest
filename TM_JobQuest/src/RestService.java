@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import ch.qos.logback.classic.LoggerContext;
+import upload.UploadPDF;
 
 @Path("/a")
 public class RestService {
@@ -74,7 +75,6 @@ public class RestService {
 			System.out.println("Error Parsing: - ");
 		}
 		System.out.println("Data Received2: " + crunchifyBuilder.toString());
-
 		// return HTTP response 200 in case of success
 		return Response.status(200).entity(crunchifyBuilder.toString()).build();
 	}
@@ -93,8 +93,6 @@ public class RestService {
 		HttpResponse response = client.execute(request);
 		System.out.println("spotligth lauched3");
 
-		//convert the json string back to object
-
 		BufferedReader rd = new BufferedReader (new InputStreamReader(response.getEntity().getContent()));
 		String line = "";
 		String result="";
@@ -105,26 +103,6 @@ public class RestService {
 
 		return Response.status(200).entity(result).build();
 
-		/*Gson gson = new Gson();
-		RequestLabel obj = gson.fromJson(result, RequestLabel.class);
-		System.out.println(obj.getQuery());
-		ArrayList<String> skills = new ArrayList<String>();
-		for(int i=0; i<obj.getResults().size(); i++){
-			skills.add(obj.getResults().get(i).getLabel());
-			System.out.println(obj.getResults().get(i).getLabel());
-		}
-		System.out.println(skills.size());
-
-		ResponseLabel test= new ResponseLabel(skills);
-
-		String test2 = gson.toJson(test);
-		System.out.println(test2);
-		return Response.status(200).entity(test2).build();
-
-		 */
-
-		//return HTTP response 200 in case of success
-		//return null;
 	}
 
 	@POST
@@ -219,7 +197,6 @@ public class RestService {
 		HttpClient client = new DefaultHttpClient();
 		HttpGet request = new HttpGet(url);
 		HttpResponse response = client.execute(request);
-		//convert the json string back to object
 
 		BufferedReader rd = new BufferedReader (new InputStreamReader(response.getEntity().getContent()));
 		String line = "";
@@ -229,7 +206,6 @@ public class RestService {
 			System.out.println(line);
 		}
 
-
 		Gson gson = new Gson();
 		RequestLabel obj = gson.fromJson(result, RequestLabel.class);
 		System.out.println(obj.getQuery());
@@ -238,10 +214,9 @@ public class RestService {
 			skills.add(obj.getResults().get(i).getLabel());
 			System.out.println(obj.getResults().get(i).getLabel());
 		}
+		
 		System.out.println(skills.size());
-
 		ResponseLabel test= new ResponseLabel(skills);
-
 		String test2 = gson.toJson(test);
 		System.out.println(test2);
 		return Response.status(200).entity(test2).build();
@@ -255,15 +230,23 @@ public class RestService {
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		loggerContext.stop();
 		System.out.println(id);
-		Test.map.put(id, 1.0);
-		Test.getInfluencedBy("http://dbpedia.org/resource/"+id, "0", Test.LEVEL, 1);
-		for (String mapKey : Test.map.keySet()) {
-			System.out.println(mapKey+" a "+ Test.map.get(mapKey));
+		SkillsWeight.map.put(id, 1.0);
+		SkillsWeight.getInfluencedBy("http://dbpedia.org/resource/"+id, "0", SkillsWeight.LEVEL, 1);
+		for (String mapKey : SkillsWeight.map.keySet()) {
+			System.out.println(mapKey+" a "+ SkillsWeight.map.get(mapKey));
+		}
+		
+		for (String mapKey : UploadPDF.getFrequency().keySet()) {
+			if(SkillsWeight.map.containsKey(mapKey)){
+				SkillsWeight.map.put(mapKey, SkillsWeight.map.get(mapKey)+UploadPDF.getFrequency().get(mapKey));
+			}else{
+				SkillsWeight.map.put(mapKey, (double)UploadPDF.getFrequency().get(mapKey));
+			}
 		}
 
-		Test.ValueComparator comparateur = new Test.ValueComparator(Test.map);
+		SkillsWeight.ValueComparator comparateur = new SkillsWeight.ValueComparator(SkillsWeight.map);
 		TreeMap<String,Double> mapTriee = new TreeMap<String,Double>(comparateur);
-		mapTriee.putAll(Test.map);
+		mapTriee.putAll(SkillsWeight.map);
 		ArrayList<Tag> finalTags = new ArrayList<>();
 		int count = 0;
 		for (String mapKey : mapTriee.keySet()) {
