@@ -136,7 +136,7 @@ public class SkillsWeight {
 				for(int i=0; i<listTemp.size(); i++){
 					listTemp.get(i).setWeight((1.0/listTemp.size())*value);
 					if(map.containsKey(listTemp.get(i).getName())){
-						//System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
+						System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 						map.put(listTemp.get(i).getName(), map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 					}else{
 						map.put(listTemp.get(i).getName(), listTemp.get(i).getWeight());
@@ -198,7 +198,7 @@ public class SkillsWeight {
 				for(int i=0; i<listTemp.size(); i++){
 					listTemp.get(i).setWeight((1.0/listTemp.size())*value);
 					if(map.containsKey(listTemp.get(i).getName())){
-						//System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
+						System.out.println("Le poids de :"+listTemp.get(i).getName()+" est "+map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 						map.put(listTemp.get(i).getName(), map.get(listTemp.get(i).getName())+(listTemp.get(i).getWeight()));
 					}else{
 						map.put(listTemp.get(i).getName(), listTemp.get(i).getWeight());
@@ -283,8 +283,8 @@ public class SkillsWeight {
 		temp.add(java);
 		//temp.add(c);
 		//temp.add(mysql);
-				
-		for (String mapKey : getAllSkillsWeight(temp).keySet()) {
+		HashMap<String, Double> temp1 = getAllSkillsWeight(temp);
+		for (String mapKey : temp1.keySet()) {
 			//System.out.println(mapKey+" a "+ map.get(mapKey));
 		}
 
