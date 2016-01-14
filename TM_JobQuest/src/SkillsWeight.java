@@ -1,6 +1,8 @@
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +17,9 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.sparql.SPARQLRepository;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.net.SyslogOutputStream;
@@ -264,65 +269,76 @@ public class SkillsWeight {
 			} 
 		}
 	}
-	
+
 	public static HashMap<String, Double> mergeSkillAndPDF(HashMap<String, Double> skill, HashMap<String, Long> tempMap){
-				for(String key : tempMap.keySet()){
-					if(skill.containsKey(key)){
-						skill.put(key, map.get(key)+tempMap.get(key));
-					}else{
-						skill.put(key, (double)tempMap.get(key));
-					}
-				}
-				return skill;		
+		for(String key : tempMap.keySet()){
+			if(skill.containsKey(key)){
+				skill.put(key, map.get(key)+tempMap.get(key));
+			}else{
+				skill.put(key, (double)tempMap.get(key));
+			}
+		}
+		return skill;		
 	}
 
 
-	public static void main(String[] args) throws Exception {
-		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-		loggerContext.stop();
+	public static double getSimBetween(Person personA, Person personB) throws Exception{
+		String path = "/Users/paulineboukhaled/git/TM_JobQuest/";
+
+		File fPersonA = new File(path+personA.getFirstname()+"_"+personA.getName()+".json");
+		File fPersonB = new File(path+personB.getFirstname()+"_"+personB.getName()+".json");
+		HashMap<String, Double> temp1 = new HashMap<>();
+		HashMap<String, Double> temp22 = new HashMap<>();
+
+
 
 		//-----------------------------------CANDIDAT NUMBER 1
-		//----Files attached
-		File cv = new File("cv.pdf");
-		HashMap<String, Long> tempMap = UploadPDF.getHashMapAttachedFiles(cv);
-		//----Skill
-		Skill java = new Skill("Java_(programming_language)", 3, 2, 0, null);
-		ArrayList<Skill> temp = new ArrayList<>();
-		temp.add(java);
-		HashMap<String, Double> temp1 = new HashMap<>();
-		temp1.putAll(getAllSkillsWeight(temp));
-		// Merge hashmap skill and hashmap attached files
-		temp1.putAll(mergeSkillAndPDF(temp1, tempMap));
+		if(!fPersonA.exists()){
+			File cv = new File("cv.pdf");
+			HashMap<String, Long> tempMap = UploadPDF.getHashMapAttachedFiles(cv);
+			ArrayList<Skill> temp = personA.getListOfSkill();
+			temp1.putAll(getAllSkillsWeight(temp));
+			// Merge hashmap skill and hashmap attached files
+			temp1.putAll(mergeSkillAndPDF(temp1, tempMap));
+
+			// CREATION FILES FOR WEIGTHS
+			PrintWriter pw = null;
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			pw = new PrintWriter(path+personA.getFirstname()+"_"+personA.getName()+".json");
+			pw.write(gson.toJson(temp1));
+			pw.close();
+		}else{
+			temp1.putAll(FileLoader.getAllGoodTweets(path+personA.getFirstname()+"_"+personA.getName()+".json"));
+		}
 
 		//-----------------------------------CANDIDAT NUMBER 2
-		//Skill mysql = new Skill("Falcon_(programming_language)", 3, 2, 0, null);
-		Skill c = new Skill("PHP", 3, 2, 0, null);
-		ArrayList<Skill> temp2 = new ArrayList<>();
-		temp2.add(c);
-		//temp2.add(mysql);
-		HashMap<String, Double> temp22 = new HashMap<>();
-		temp22.putAll(getAllSkillsWeight(temp2));
-		
+		if(!fPersonB.exists()){
+			ArrayList<Skill> temp2 = personB.getListOfSkill();
+			temp22.putAll(getAllSkillsWeight(temp2));	
+			// CREATION FILES FOR WEIGTHS
+			PrintWriter pw = null;
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			pw = new PrintWriter(path+personB.getFirstname()+"_"+personB.getName()+".json");
+			pw.write(gson.toJson(temp22));
+			pw.close();
+		}else{
+			temp22.putAll(FileLoader.getAllGoodTweets(path+personB.getFirstname()+"_"+personB.getName()+".json"));
+		}
 
-		// CREATION DU VECTEUR DE TERME
+		//-----------------------------------CREATION DU VECTEUR DE TERME
 		ArrayList<String> terms = new ArrayList<>();
 		for(String key : temp1.keySet()){
 			if(!terms.contains(key)){
-				System.out.println("ne contient pas key1: "+key);
-				if(temp22.containsKey(key)){
-					System.out.println("temp2 contient: "+key);
-				}
 				terms.add(key);
 			}
 		}
 		for(String key2 : temp22.keySet()){
 			if(!terms.contains(key2)){
-				System.out.println("ne contient pas: "+key2);
 				terms.add(key2);
 			}
 		}
 
-		// comparaison de deux vecteurs
+		//-----------------------------------COMPARAISON DE 2 VECTEURS
 		double[][] matrice =  new double[2][terms.size()];
 		for(int i=0; i<matrice.length ; i++){
 			for(int j=0; j<matrice[0].length; j++){
@@ -354,9 +370,115 @@ public class SkillsWeight {
 			System.out.println();
 
 		}
-		
+
+
 		double sim = CosineSimilarity.cosineSimilarity(matrice[0], matrice[1]);
-		System.out.println("la similarité entre java et falcon :"+sim);
+		return sim;
+	}
+
+
+	public static void main(String[] args) throws Exception {
+		PrintWriter pw = null;
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		loggerContext.stop();
+		Date d1 = new Date();
+		Skill java = new Skill("Java_(programming_language)", 3, 2, 0, null);
+		ArrayList<Skill> temp = new ArrayList<>();
+		temp.add(java);
+		//Skill mysql = new Skill("Falcon_(programming_language)", 3, 2, 0, null);
+		Skill c = new Skill("PHP", 3, 2, 0, null);
+		ArrayList<Skill> temp2 = new ArrayList<>();
+		temp2.add(c);
+		//temp2.add(mysql);
+		Person paulinesavelli = new Person("Savelli", "Pauline", d1, "21 avenue du moléson", 1700, "Fribourg", temp, false, true);
+		Person victorboukhaled = new Person("Boukhaled", "Victor", d1, "21 avenue du moléson", 1700, "Fribourg", temp2, false, true);
+
+		System.out.println("la similarité entre java et falcon :"+getSimBetween(paulinesavelli, victorboukhaled));
+
+
+		//		//		//-----------------------------------CANDIDAT NUMBER 1
+		//		//		//----Files attached
+		//		//		File cv = new File("cv.pdf");
+		//		//		HashMap<String, Long> tempMap = UploadPDF.getHashMapAttachedFiles(cv);
+		//		//		//----Skill
+		//		//		Skill java = new Skill("Java_(programming_language)", 3, 2, 0, null);
+		//		//		System.out.println("Start load skill");
+		//		//		ArrayList<Skill> temp = new ArrayList<>();
+		//		//		temp.add(java);
+		//		//		HashMap<String, Double> temp1 = new HashMap<>();
+		//		//		temp1.putAll(getAllSkillsWeight(temp));
+		//		//		// Merge hashmap skill and hashmap attached files
+		//		//		temp1.putAll(mergeSkillAndPDF(temp1, tempMap));
+		//
+		//		HashMap<String, Double> temp1 = new HashMap<>();
+		//		String path = "/Users/paulineboukhaled/git/TM_JobQuest/Java_(programming_language)3_2.json";
+		//		temp1.putAll(FileLoader.getAllGoodTweets(path));
+		//
+		//		// CREATION FILES FOR WEIGTHS
+		//		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		//		pw = new PrintWriter("Java_(programming_language)"+3+"_"+2+".json");
+		//		pw.write(gson.toJson(temp1));
+		//		pw.close();
+		//
+		//		//-----------------------------------CANDIDAT NUMBER 2
+		//		//Skill mysql = new Skill("Falcon_(programming_language)", 3, 2, 0, null);
+		//		Skill c = new Skill("PHP", 3, 2, 0, null);
+		//		ArrayList<Skill> temp2 = new ArrayList<>();
+		//		temp2.add(c);
+		//		//temp2.add(mysql);
+		//		HashMap<String, Double> temp22 = new HashMap<>();
+		//		temp22.putAll(getAllSkillsWeight(temp2));
+		//
+		//
+		//		// CREATION DU VECTEUR DE TERME
+		//		ArrayList<String> terms = new ArrayList<>();
+		//		for(String key : temp1.keySet()){
+		//			if(!terms.contains(key)){
+		//				terms.add(key);
+		//			}
+		//		}
+		//		for(String key2 : temp22.keySet()){
+		//			if(!terms.contains(key2)){
+		//				terms.add(key2);
+		//			}
+		//		}
+		//
+		//		// comparaison de deux vecteurs
+		//		double[][] matrice =  new double[2][terms.size()];
+		//		for(int i=0; i<matrice.length ; i++){
+		//			for(int j=0; j<matrice[0].length; j++){
+		//				if(i==0){
+		//					if(temp1.containsKey(terms.get(j))){
+		//						matrice[i][j] = temp1.get(terms.get(j));
+		//					}else{
+		//						matrice[i][j] = 0;
+		//					}
+		//				}else{
+		//					if(temp22.containsKey(terms.get(j))){
+		//						matrice[i][j] = temp22.get(terms.get(j));
+		//					}else{
+		//						matrice[i][j] = 0;	
+		//					}
+		//				}
+		//			}
+		//		}
+		//
+		//		for(String k : terms){
+		//			System.out.print(k+"\t");
+		//		}
+		//		System.out.print("\n");
+		//
+		//		for(int i=0; i<matrice.length ; i++){
+		//			for(int j=0; j<matrice[0].length; j++){
+		//				System.out.print(matrice[i][j]+" \t");
+		//			}
+		//			System.out.println();
+		//
+		//		}
+		//
+		//		double sim = CosineSimilarity.cosineSimilarity(matrice[0], matrice[1]);
+
+
 
 
 
