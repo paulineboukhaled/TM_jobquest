@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,10 +29,12 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.fileupload.FileItem;
@@ -42,6 +46,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.pdfbox.PDFReader;
+import org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -57,6 +62,7 @@ import ch.qos.logback.core.net.SyslogOutputStream;
  * Servlet implementation class UploadPDF
  */
 @WebServlet("/UploadPDF")
+@MultipartConfig
 public class UploadPDF extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private ServletFileUpload uploader = null;
@@ -70,11 +76,11 @@ public class UploadPDF extends HttpServlet {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	
-	
+
+
 	static class ValueComparator implements Comparator<String> {
 		Map<String, Long> base;
-		
+
 		public ValueComparator(Map<String, Long> base) {
 			this.base = base;
 		}
@@ -109,7 +115,31 @@ public class UploadPDF extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {	
+		
+		// Get the parameters
+		String nom = request.getParameter("nom");
+		String prenom = request.getParameter("prenom");
+		String birthdate = request.getParameter("birthdate");
+		String address = request.getParameter("address");
+		String npa = request.getParameter("npa");
+		String city = request.getParameter("city");
+		String field1 = request.getParameter("prof1");
+		ArrayList<String> listofSkill = new ArrayList<>();
+		listofSkill.add(field1);
+		System.out.println(field1);
+		int index=2;
+		String field;
+		if(request.getParameter("field"+index)!=null){
+			while(request.getParameter("field"+index)!=null){
+				field = request.getParameter("field"+index);
+				listofSkill.add(field);
+				index++;
+			}
+		}
+
+
+
 		if(!ServletFileUpload.isMultipartContent(request)){
 			throw new ServletException("Content type is not multipart/form-data");
 		}
@@ -117,7 +147,7 @@ public class UploadPDF extends HttpServlet {
 		ArrayList<String> keywords = new ArrayList<>();
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
-		out.write("<html><head></head><body>");
+		//		out.write("<html><head><meta http-equiv=\"refresh" content="0; url=http://example.com/" /></head><body>");
 		try {
 			List<FileItem> fileItemsList = uploader.parseRequest(request);
 			Iterator<FileItem> fileItemsIterator = fileItemsList.iterator();
@@ -170,7 +200,7 @@ public class UploadPDF extends HttpServlet {
 						}
 					}
 				}
-				
+
 				// TRI DE LA MAP
 				ValueComparator comparateur = new ValueComparator(frequency);
 				TreeMap<String,Long> mapTriee = new TreeMap<String,Long>(comparateur);
@@ -189,7 +219,21 @@ public class UploadPDF extends HttpServlet {
 		}
 		out.write("</body></html>");
 	}
-	
+
+	//	public void doPost(HttpServletRequest request,
+	//			HttpServletResponse response)
+	//					throws ServletException, IOException {
+	//
+	//		System.out.println(request.getParameter("username"));
+	//		
+	//		Collection<Part> userName = request.getParts();
+	//		for(Part p : userName){
+	//			System.out.println(p.getContentType());
+	//		}
+	//
+	//		//String password = request.getParameter("password");
+	//	}
+
 	public static HashMap<String, Long> getHashMapAttachedFiles(File file) throws Exception {
 		String cat2 = OCRRestAPI.pdfToTxt(file.getPath());
 		Gson gson = new GsonBuilder().create();
@@ -229,11 +273,11 @@ public class UploadPDF extends HttpServlet {
 					}
 				}
 			}
-		getFrequency();
+			getFrequency();
 		}
 		return frequency;
 	}
-	
+
 	public static HashMap<String, Long> getFrequency() {
 		return frequency;
 	}

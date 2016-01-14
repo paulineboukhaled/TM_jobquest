@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -16,19 +17,23 @@ import org.openrdf.repository.sparql.SPARQLRepository;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.net.SyslogOutputStream;
 import upload.UploadPDF;
+import upload.*;
 
 public class SkillsWeight {
 	static HashMap<String, Double> map = new HashMap<String, Double>();
+	static HashMap<String, Double> map2 = new HashMap<String, Double>();
+
 	static ArrayList<Skill> listOfSkill = new ArrayList<>();
-	static final int MAX_RESULT = 50;
-	static final int LEVEL = 2;
+	static final int MAX_RESULT = 20;
+	static final int LEVEL = 1;
 
 	static int count = 0;
 
-//	static HashMap<String, ObjDBPEDIA>
-	
-	
+	//	static HashMap<String, ObjDBPEDIA>
+
+
 	public static HashMap<String, Double> getAllSkillsWeight(ArrayList<Skill> listOfSkills){
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		loggerContext.stop();		
@@ -103,8 +108,8 @@ public class SkillsWeight {
 		}
 		return listOfSkill;
 	}
-	
-	
+
+
 	public static ArrayList<Skill> getInfluenced(String URI, String URIParent, int level, double value){
 		count = 0;
 		ArrayList<Skill> listTemp = new ArrayList<>();
@@ -165,7 +170,7 @@ public class SkillsWeight {
 		}
 		return listOfSkill;
 	}
-	
+
 	public static ArrayList<Skill> getParadigm(String URI, String URIParent, int level, double value){
 		count = 0;
 		ArrayList<Skill> listTemp = new ArrayList<>();
@@ -230,7 +235,7 @@ public class SkillsWeight {
 
 	static class ValueComparator implements Comparator<String> {
 		Map<String, Double> base;
-		
+
 		public ValueComparator(Map<String, Double> base) {
 			this.base = base;
 		}
@@ -243,10 +248,10 @@ public class SkillsWeight {
 			} 
 		}
 	}
-	
+
 	static class ValueComparator2 implements Comparator<String> {
 		Map<String, Long> base;
-		
+
 		public ValueComparator2(Map<String, Long> base) {
 			this.base = base;
 		}
@@ -260,52 +265,117 @@ public class SkillsWeight {
 		}
 	}
 	
-	
+	public static HashMap<String, Double> mergeSkillAndPDF(HashMap<String, Double> skill, HashMap<String, Long> tempMap){
+				for(String key : tempMap.keySet()){
+					if(skill.containsKey(key)){
+						skill.put(key, map.get(key)+tempMap.get(key));
+					}else{
+						skill.put(key, (double)tempMap.get(key));
+					}
+				}
+				return skill;		
+	}
+
+
 	public static void main(String[] args) throws Exception {
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		loggerContext.stop();
-		
+
+		//-----------------------------------CANDIDAT NUMBER 1
+		//----Files attached
 		File cv = new File("cv.pdf");
-	    System.out.println(cv.getAbsolutePath()); 
 		HashMap<String, Long> tempMap = UploadPDF.getHashMapAttachedFiles(cv);
-		
-		
-		// TRI DE LA MAP
-		ValueComparator2 comparateur2 = new ValueComparator2(tempMap);
-		TreeMap<String,Long> mapTriee2 = new TreeMap<String,Long>(comparateur2);
-		mapTriee2.putAll(tempMap);
-		System.out.println("resultat du tri: "+ mapTriee2);
-		
+		//----Skill
 		Skill java = new Skill("Java_(programming_language)", 3, 2, 0, null);
-		//Skill mysql = new Skill("MySQL", 3, 2, 0, null);
-		//Skill c = new Skill("C_(programming_language)", 3, 2, 0, null);
 		ArrayList<Skill> temp = new ArrayList<>();
 		temp.add(java);
-		//temp.add(c);
-		//temp.add(mysql);
-		HashMap<String, Double> temp1 = getAllSkillsWeight(temp);
-		for (String mapKey : temp1.keySet()) {
-			//System.out.println(mapKey+" a "+ map.get(mapKey));
-		}
+		HashMap<String, Double> temp1 = new HashMap<>();
+		temp1.putAll(getAllSkillsWeight(temp));
+		// Merge hashmap skill and hashmap attached files
+		temp1.putAll(mergeSkillAndPDF(temp1, tempMap));
 
-		for(String key : tempMap.keySet()){
-			if(map.containsKey(key)){
-				System.out.println("Même élément: "+key);
-				map.put(key, map.get(key)+tempMap.get(key));
-			}else{
-				map.put(key, (double)tempMap.get(key));
+		//-----------------------------------CANDIDAT NUMBER 2
+		//Skill mysql = new Skill("Falcon_(programming_language)", 3, 2, 0, null);
+		Skill c = new Skill("PHP", 3, 2, 0, null);
+		ArrayList<Skill> temp2 = new ArrayList<>();
+		temp2.add(c);
+		//temp2.add(mysql);
+		HashMap<String, Double> temp22 = new HashMap<>();
+		temp22.putAll(getAllSkillsWeight(temp2));
+		
 
+		// CREATION DU VECTEUR DE TERME
+		ArrayList<String> terms = new ArrayList<>();
+		for(String key : temp1.keySet()){
+			if(!terms.contains(key)){
+				System.out.println("ne contient pas key1: "+key);
+				if(temp22.containsKey(key)){
+					System.out.println("temp2 contient: "+key);
+				}
+				terms.add(key);
 			}
-			
+		}
+		for(String key2 : temp22.keySet()){
+			if(!terms.contains(key2)){
+				System.out.println("ne contient pas: "+key2);
+				terms.add(key2);
+			}
+		}
+
+		// comparaison de deux vecteurs
+		double[][] matrice =  new double[2][terms.size()];
+		for(int i=0; i<matrice.length ; i++){
+			for(int j=0; j<matrice[0].length; j++){
+				if(i==0){
+					if(temp1.containsKey(terms.get(j))){
+						matrice[i][j] = temp1.get(terms.get(j));
+					}else{
+						matrice[i][j] = 0;
+					}
+				}else{
+					if(temp22.containsKey(terms.get(j))){
+						matrice[i][j] = temp22.get(terms.get(j));
+					}else{
+						matrice[i][j] = 0;	
+					}
+				}
+			}
+		}
+
+		for(String k : terms){
+			System.out.print(k+"\t");
+		}
+		System.out.print("\n");
+
+		for(int i=0; i<matrice.length ; i++){
+			for(int j=0; j<matrice[0].length; j++){
+				System.out.print(matrice[i][j]+" \t");
+			}
+			System.out.println();
+
 		}
 		
-		// TRI DE LA MAP
-		ValueComparator comparateur = new ValueComparator(map);
-		TreeMap<String,Double> mapTriee = new TreeMap<String,Double>(comparateur);
-		mapTriee.putAll(map);
-		System.out.println("resultat du tri: "+ mapTriee);
-		
+		double sim = CosineSimilarity.cosineSimilarity(matrice[0], matrice[1]);
+		System.out.println("la similarité entre java et falcon :"+sim);
+
+
+
 	}
+
+
+	/*public void getCosineSimilarity() {
+		for (int i = 0; i < tfidfDocsVector.size(); i++) {
+			for (int j = 0; j < tfidfDocsVector.size(); j++) {
+				System.out.println("between " + i + " and " + j + "  =  "
+						+ new CosineSimilarity().cosineSimilarity
+						(
+								tfidfDocsVector.get(i), 
+								tfidfDocsVector.get(j)
+								)
+						);
+			}
+		}
+	}*/
 
 	/**
 	 * @param args
@@ -318,7 +388,7 @@ public class SkillsWeight {
 		getInfluenced("http://dbpedia.org/resource/Java_(programming_language)", "0", LEVEL, 1);
 		getParadigm("http://dbpedia.org/resource/Java_(programming_language)", "0", LEVEL, 1);
 
-		
+
 		for (String mapKey : map.keySet()) {
 			System.out.println(mapKey+" a "+ map.get(mapKey));
 		}

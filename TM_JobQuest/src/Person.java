@@ -1,28 +1,17 @@
+import java.util.ArrayList;
+import java.util.Date;
 
 public class Person {
 	
-	private String nom;
-	private String prenom;
+	private String name;
+	private String firstname;
+	private Date birthdate;
+	private String address;
+	private long npa;
+	private String city;
+	private ArrayList<Skill> listOfSkill;
 	private	boolean isActive;
 	
-	public boolean isActive() {
-		return isActive;
-	}
-	public void setActive(boolean isActive) {
-		this.isActive = isActive;
-	}
-	public String getNom() {
-		return nom;
-	}
-	public void setNom(String name) {
-		this.nom = name;
-	}
-	public String getPrenom() {
-		return prenom;
-	}
-	public void setPrenom(String familyname) {
-		this.prenom = familyname;
-	}
 	
 	
 
