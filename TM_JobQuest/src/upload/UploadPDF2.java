@@ -57,14 +57,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import ch.qos.logback.core.net.SyslogOutputStream;
-import processing.OCRRestAPI;
 
 /**
  * Servlet implementation class UploadPDF
  */
-@WebServlet("/UploadPDF")
+@WebServlet("/UploadPDF2")
 @MultipartConfig
-public class UploadPDF extends HttpServlet {
+public class UploadPDF2 extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private ServletFileUpload uploader = null;
 	private static HashMap<String, Long> frequency= new HashMap<>() ;
@@ -73,7 +72,7 @@ public class UploadPDF extends HttpServlet {
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
-	public UploadPDF() {
+	public UploadPDF2() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
@@ -118,28 +117,6 @@ public class UploadPDF extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {	
 		
-		// Get the parameters
-		String nom = request.getParameter("nom");
-		String prenom = request.getParameter("prenom");
-		String birthdate = request.getParameter("birthdate");
-		String address = request.getParameter("address");
-		String npa = request.getParameter("npa");
-		String city = request.getParameter("city");
-		String field1 = request.getParameter("prof1");
-		ArrayList<String> listofSkill = new ArrayList<>();
-		listofSkill.add(field1);
-		System.out.println(field1);
-		int index=2;
-		String field;
-		if(request.getParameter("field"+index)!=null){
-			while(request.getParameter("field"+index)!=null){
-				field = request.getParameter("field"+index);
-				listofSkill.add(field);
-				index++;
-			}
-		}
-
-
 
 		if(!ServletFileUpload.isMultipartContent(request)){
 			throw new ServletException("Content type is not multipart/form-data");
@@ -158,59 +135,7 @@ public class UploadPDF extends HttpServlet {
 				System.out.println("FileName="+fileItem.getName());
 				System.out.println("ContentType="+fileItem.getContentType());
 				System.out.println("Size in bytes="+fileItem.getSize());
-				if(fileItem.getContentType()!=null && fileItem.getFieldName()!=null){
-
-					File file = new File("./"+File.separator+fileItem.getName());
-					String cat2 = OCRRestAPI.pdfToTxt(file.getPath());
-
-					Gson gson = new GsonBuilder().create();
-					ResponseOCR ocr = gson.fromJson(cat2, ResponseOCR.class);
-					System.out.println(ocr.getOCRText());
-					int i = 0;
-					for (List<String> v : ocr.getOCRText()){
-						for(String j : v){
-							String x = j.replaceAll("[^A-Za-z0-9 ]","");
-							x = x.replaceAll("\\s", "%20");
-							String url = "http://spotlight.sztaki.hu:2222/rest/annotate?text="+x+"&confidence=0.2&support=20";
-							HttpClient client = new DefaultHttpClient();
-							HttpGet request2 = new HttpGet(url);
-							request2.addHeader("accept", "application/json");
-							HttpResponse response2 = client.execute(request2);
-							int code = response2.getStatusLine().getStatusCode();
-							if(code==200){
-								BufferedReader rd = new BufferedReader (new InputStreamReader(response2.getEntity().getContent()));
-								String line = "";
-								String result="";
-								while ((line = rd.readLine()) != null) {
-									result+=line;
-								}
-								gson = new GsonBuilder().create();
-								ResponseSpotlight resultSpotlight = gson.fromJson(result, ResponseSpotlight.class);
-								for(ResponseSpotlight.Resource r : resultSpotlight.getResources()){
-									String uri = r.getURI();
-									uri = uri.replace("http://dbpedia.org/resource/", "");
-									uri = uri.replace("_", " ");
-									keywords.add(uri);
-									if(frequency.containsKey(uri)){
-										frequency.put(uri, frequency.get(uri)+1);
-									}else{
-										frequency.put(uri, (long) 1);
-									}
-								}
-							}
-						}
-					}
-				}
-
-				// TRI DE LA MAP
-				ValueComparator comparateur = new ValueComparator(frequency);
-				TreeMap<String,Long> mapTriee = new TreeMap<String,Long>(comparateur);
-				mapTriee.putAll(frequency);
-				System.out.println("resultat du tri: "+ mapTriee);
-				//fileItem.write(file);
-				out.write("File "+fileItem.getName()+ " uploaded successfully.");
-				out.write("<br>");
-				out.write("<a href=\"UploadDownloadFileServlet?fileName="+fileItem.getName()+"\">Download "+fileItem.getName()+"</a>");
+			
 			}
 		} catch (FileUploadException e) {
 			out.write("Exception in file uploading file.");
@@ -235,56 +160,6 @@ public class UploadPDF extends HttpServlet {
 	//		//String password = request.getParameter("password");
 	//	}
 
-	public static HashMap<String, Long> getHashMapAttachedFiles(File file) throws Exception {
-		String cat2 = OCRRestAPI.pdfToTxt(file.getPath());
-		Gson gson = new GsonBuilder().create();
-		ResponseOCR ocr = gson.fromJson(cat2, ResponseOCR.class);
-		System.out.println(ocr.getOCRText());
-		int i = 0;
-		ArrayList<String> keywords = new ArrayList<>();
-		for (List<String> v : ocr.getOCRText()){
-			for(String j : v){
-				String x = j.replaceAll("[^A-Za-z0-9 ]","");
-				x = x.replaceAll("\\s", "%20");
-				String url = "http://spotlight.sztaki.hu:2222/rest/annotate?text="+x+"&confidence=0.2&support=20";
-				HttpClient client = new DefaultHttpClient();
-				HttpGet request2 = new HttpGet(url);
-				request2.addHeader("accept", "application/json");
-				HttpResponse response2 = client.execute(request2);
-				int code = response2.getStatusLine().getStatusCode();
-				if(code==200){
-					BufferedReader rd = new BufferedReader (new InputStreamReader(response2.getEntity().getContent()));
-					String line = "";
-					String result="";
-					while ((line = rd.readLine()) != null) {
-						result+=line;
-					}
-					gson = new GsonBuilder().create();
-					ResponseSpotlight resultSpotlight = gson.fromJson(result, ResponseSpotlight.class);
-					for(ResponseSpotlight.Resource r : resultSpotlight.getResources()){
-						String uri = r.getURI();
-						uri = uri.replace("http://dbpedia.org/resource/", "");
-						uri = uri.replace("_", " ");
-						keywords.add(uri);
-						if(frequency.containsKey(uri)){
-							frequency.put(uri, frequency.get(uri)+1);
-						}else{
-							frequency.put(uri, (long) 1);
-						}
-					}
-				}
-			}
-			getFrequency();
-		}
-		return frequency;
-	}
-
-	public static HashMap<String, Long> getFrequency() {
-		return frequency;
-	}
-
-	public static void setFrequency(HashMap<String, Long> frequency) {
-		UploadPDF.frequency = frequency;
-	}
+	
 
 }

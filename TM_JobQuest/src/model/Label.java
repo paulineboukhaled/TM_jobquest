@@ -1,3 +1,4 @@
+package model;
 
 public class Label {
 	private String label;
