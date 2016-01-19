@@ -63,8 +63,11 @@ import processing.SkillsWeight;
 import upload.UploadPDF;
 
 @Path("/user")
-public class UploadUserInformation {
+public class UserInformation {
 	//static final int NUMBER_OF_TAGS = 10;
+	
+	SaveOnSesame sesame = new SaveOnSesame();
+
 	
 	@POST
 	@Path("/getForm")
@@ -87,7 +90,7 @@ public class UploadUserInformation {
 		
 		Person newCandidat = gson.fromJson(crunchifyBuilder.toString(), Person.class);
 		
-		URI identifier = SaveOnSesame.saveCandidat(newCandidat);
+		URI identifier = sesame.saveCandidat(newCandidat);
 
 		if(identifier==null){
 			return Response.status(500).build();
@@ -119,6 +122,53 @@ public class UploadUserInformation {
 		// return HTTP response 200 in case of success
 		return Response.status(200).entity(crunchifyBuilder.toString()).build();
 	}
+	
+	@GET
+	@Path("/list")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getList(InputStream incomingData) {
+		
+		
+		ArrayList<Person> listPerson = sesame.getUser();
+				
+		return Response.status(200).entity(listPerson).build();
+	}
+	
+	
+	
+	
+
+//
+//	$scope.candidats = {
+//			0:{
+//		firstname:"Pauline",
+//		lastname:"Bou Khaled",
+//		position: 10,
+//		skills:{
+//		computer:{
+//		"java":{
+//		years:2,
+//		level: 1
+//	},
+//		"cpp":{
+//		years:4,
+//		level: 2
+//	},
+//		"html":{
+//		years:10,
+//		level: 1
+//	},
+//		"css":{
+//		years:1,
+//		level: 2
+//	}
+//	}
+//	},
+//		isSelected: true
+//	},
+//
+//
+//	}
 
 	
 //	@POST

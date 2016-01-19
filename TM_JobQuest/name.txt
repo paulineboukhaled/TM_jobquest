@@ -1,0 +1,750 @@
+Plankalk%C3%BCl   
+   XBasic    
+   Abstract   syntax    
+   Accent          
+   COWSEL    
+   FLOW-MATIC    
+   Metacharacter    
+   Standard   ML    
+   AgentSheets    
+   Basic4GL    
+   E   (verification   language)    
+   Extensible   Embeddable   Language    
+   Gemstone   (database)    
+   GluonJ    
+   Helium   (Haskell)    
+   Impulse   C    
+   JScheme    
+   KNITRO    
+   Logtalk    
+   Run   BASIC    
+   Ferite    
+   Fantom          
+   GrGen    
+   MVEL    
+   Net.Data    
+   PCASTL    
+   PLEXIL    
+   Pnuts    
+   QB64    
+   Refal    
+   Vvvv    
+   XBLite    
+   XRuby    
+   Gosu          
+   Ateji   PX    
+   Objeck          
+   OptimJ    
+   PowerLanguage    
+   Trade   Space   Visualizer    
+   PONIE    
+   MacroML    
+   BBC   BASIC    
+   C++    
+   Lua          
+   PowerBASIC    
+   PureBasic    
+   Self          
+   Locomotive   BASIC    
+   MetaPost    
+   SmallBASIC    
+   ALGOL    
+   AMOS          
+   ANSI   C    
+   APL          
+   AWK    
+   Ada          
+   Assembly   language    
+   BASIC    
+   BCPL    
+   B          
+   Blitz   BASIC    
+   Brainfuck    
+   CLU          
+   COBOL    
+   C          
+   Common   Lisp    
+   Coral   66    
+   Cyclone          
+   Dylan          
+   Eiffel          
+   Erlang          
+   Euphoria          
+   Forth          
+   Fortran    
+   Fourth-generation   programming   language    
+   Godiva          
+   Icon          
+   JavaScript    
+   Java          
+   KRL          
+   Kent   Recursive   Calculator    
+   LiveScript    
+   ML          
+   MOO          
+   MUMPS    
+   Mary          
+   Mercury          
+   Mesa          
+   Modula    
+   Nial    
+   Occam          
+   PL/I    
+   Pascal          
+   Perl    
+   PostScript    
+   Prolog    
+   QuakeC    
+   SNOBOL    
+   SQL    
+   Sather    
+   Sed    
+   Simula    
+   Smalltalk    
+   Steelman   language   requirements    
+   DataFlex    
+   EasyLanguage    
+   NesC    
+   ProvideX    
+   Vilnius   BASIC    
+   Joe-E    
+   Script.NET    
+   AngelScript    
+   AgentSpeak    
+   Hugo          
+   SASL          
+   Newspeak          
+   Ypsilon   (Scheme   implementation)    
+   KonsolScript    
+   Brutus2D    
+   Concurrent   Euclid    
+   G-code    
+   COMIT    
+   Compatibility   of   C   and   C++    
+   SPARQL    
+   PLEX          
+   SK8    
+   Tulip   (python   project)    
+   Cayenne          
+   F          
+   J   operator    
+   Lucid          
+   Not   Quite   C    
+   Sass   (stylesheet   language)    
+   Servant   (CORBA)    
+   G%C3%B6del          
+   Fabrik   (software)    
+   RTL/2    
+   Compiler   construction    
+   *Lisp    
+   Pacbase    
+   Symbolic   programming    
+   Business   Intelligence   Markup   Language    
+   JavaServer   Pages    
+   Lisp          
+   Logo          
+   MATLAB    
+   MOS   Technology   6502    
+   Motorola   6809    
+   OCaml    
+   Oberon          
+   PDP-8    
+   PHP    
+   Python          
+   Rebol    
+   Ruby          
+   Scalable   Vector   Graphics    
+   Scheme          
+   Shell   script    
+   True   BASIC    
+   VHDL    
+   XML    
+   XSLT    
+   Compiled   language    
+   AspectJ    
+   Join   point    
+   IBM   RPG   II    
+   A++    
+   SuperPascal    
+   Aldor    
+   NESL    
+   Pidgin   code    
+   ECLR-attributed   grammar    
+   WLanguage    
+   SWLPC    
+   C   process   control    
+   Color   BASIC    
+   Intrinsic   function    
+   Java   Persistence   Query   Language    
+   Mac   OS   Runtime   for   Java    
+   RubyJS    
+   Microdata   Corporation    
+   Cybil          
+   Xerox   Escape   Sequence    
+   DATATRIEVE    
+   LR-attributed   grammar    
+   PL-6    
+   TorqueScript    
+   ANSI/ISO   C   Specification   Language    
+   Advanced   Continuous   Simulation   Language    
+   Alef          
+   Atom          
+   Brooks          
+   CHILL    
+   COLA   (software   architecture)    
+   DIGITAL   Command   Language    
+   Datapoint's   Advanced   Systems   Language    
+   Draco          
+   Haxe    
+   LISA   (Language   for   Instruction   Set   Architecture)    
+   MetaL          
+   Open   Programming   Language    
+   PL/P    
+   S3          
+   TMG   (language)    
+   Ur          
+   WebMethods   Flow    
+   A-normal   form    
+   FP          
+   JScript    
+   Language   for   Systems   Development    
+   XC          
+   AMBIT    
+   Asymptote   (vector   graphics   language)    
+   Elm          
+   A+          
+   Abstract   State   Machine   Language    
+   Hopscotch          
+   Itk    
+   Kojo          
+   Orc          
+   Extensible   Application   Markup   Language    
+   Object   Pascal    
+   Croma    
+   Deesel    
+   Basic   For   Qt    
+   Babelfy    
+   Discriminator    
+   ALGOL   60    
+   C*    
+   C--    
+   COMAL    
+   CPL          
+   C   Sharp          
+   Cadence   SKILL    
+   Clojure    
+   CoffeeScript    
+   Commodore   BASIC    
+   Dart          
+   Dartmouth   BASIC    
+   EuLisp    
+   GNU   Common   Lisp    
+   GW-BASIC    
+   Go          
+   HyperTalk    
+   IBM   BASIC    
+   JOSS    
+   JOVIAL    
+   JScript   .NET    
+   Julia          
+   K          
+   LPC          
+   Lasso          
+   Lisaac    
+   MSX   BASIC    
+   MUF          
+   Microsoft   BASIC    
+   Monkey   X    
+   Objective-C    
+   Objective-J    
+   P%E2%80%B2%E2%80%B2    
+   QBasic    
+   QML    
+   Q   (programming   language   from   Kx   Systems)    
+   RPL          
+   Ravenscar   profile    
+   Rust          
+   SQL/PSM    
+   STOS   BASIC    
+   Scala          
+   Seed7    
+   Sinclair   BASIC    
+   Speedcoding    
+   Split-C    
+   Swift          
+   Tcl    
+   TypeScript    
+   ISWIM    
+   Modula-2    
+   Opa          
+   ALGOL   W    
+   Chomski    
+   ColdC    
+   Constraint   Handling   Rules    
+   CoolMUD    
+   Elixir          
+   Falcon          
+   Fancy          
+   Haskell          
+   Information   Processing   Language    
+   Ioke          
+   Kotlin          
+   Language   Integrated   Query    
+   Mirah          
+   NIL          
+   NetLogo    
+   OPS5    
+   Oberon-2          
+   Object   REXX    
+   Picolisp    
+   Potion          
+   Red          
+   Reia          
+   Rexx    
+   SP/k    
+   Scratch          
+   Shen          
+   Windows   PowerShell    
+   MiniD    
+   DIBOL    
+   Object-Oriented   Turing    
+   VAX   Macro    
+   Vim   script    
+   BASIC-PLUS    
+   FOCAL          
+   MACRO-11    
+   CorVision    
+   C++03    
+   MOF   Model   to   Text   Transformation   Language    
+   Boomerang          
+   Genie          
+   Cach%C3%A9   ObjectScript    
+   Ciao          
+   Prograph    
+   Joule          
+   Argus          
+   Goo          
+   P*    
+   BLISS    
+   BitC    
+   Charm          
+   Jato   VM    
+   XSB    
+   Cool          
+   Karel          
+   Asynchronous   module   definition    
+   Candle          
+   Epigram          
+   Coarray   Fortran    
+   Colony   Framework    
+   DIANA   (intermediate   language)    
+   Emerald          
+   Euclid          
+   Flow   chart   language    
+   Handlebars   (template   system)    
+   Idris          
+   Turing+    
+   Linden   Scripting   Language    
+   NGL          
+   Oriel   (scripting   language)    
+   QUILL    
+   S-Lang   (programming   library)    
+   S2          
+   SCM   (Scheme   implementation)    
+   Snap!          
+   Swift   (parallel   scripting   language)    
+   TTM          
+   Zebra          
+   A   Sharp   (Axiom)    
+   Gnome   Basic    
+   Roy          
+   XPath    
+   F*          
+   Fluxus   (programming   environment)    
+   ParaSail          
+   Qalb          
+   Xtend    
+   ActiveVFP    
+   Asm.js    
+   Join-pattern    
+   M   Sharp          
+   MexScript    
+   Obix          
+   Praspel    
+   Programming   with   Big   Data   in   R    
+   RiscLua    
+   SAMPL    
+   Stylus   (stylesheet   language)    
+   Tritium          
+   Underscore.js    
+   TUTOR          
+   Mortran    
+   Modula-2+    
+   Newsqueak    
+   Uplevel    
+   Flow   Java    
+   Link   time    
+   Scripting   for   the   Java   Platform    
+   VistaSmalltalk    
+   Manifest   expression    
+   CGOL    
+   WordBASIC    
+   GScript    
+   Heap   pollution    
+   Compiler   correctness    
+   XL   (XML   programming   language)    
+   Dolittle          
+   Nemo          
+   UCBLogo    
+   Umple    
+   ACL2    
+   Caml    
+   Format   (Common   Lisp)    
+   Orwell          
+   Swing   (Java)    
+   Yorick          
+   ABC          
+   ALGOL   58    
+   ASIC   programming   language    
+   ActionScript    
+   Apache   Cocoon    
+   Arc          
+   Backbone.js    
+   CMS-2          
+   ECMAScript    
+   Escher          
+   Euler          
+   Extension   Language   Kit    
+   Factor          
+   GNU   Guile    
+   Hack          
+   Hop   (software)    
+   IBM   RPG    
+   IDL          
+   Janus          
+   KM   programming   language    
+   Kylix   (software)    
+   Label   (computer   science)    
+   Less   (stylesheet   language)    
+   Limbo          
+   M4   (computer   language)    
+   Miranda          
+   Mondrian   (software)    
+   Nu          
+   Oxygene          
+   Oz          
+   Pico          
+   Pike          
+   Program   transformation    
+   Racket          
+   Raptor          
+   SAC   programming   language    
+   SALSA          
+   SystemVerilog    
+   Unicon          
+   Vala          
+   Visual   Basic    
+   Visual   Basic   .NET    
+   Wolfram   Language    
+   ATS          
+   Join-calculus    
+   LOLCODE    
+   LiveCode    
+   ASF+SDF   Meta   Environment    
+   Alice          
+   Bon          
+   CAL   Actor   Language    
+   Cg          
+   Charm++    
+   Clean          
+   Component   Pascal    
+   DYNAMO          
+   ECL   (data-centric   programming   language)    
+   ELI          
+   Hermes          
+   Hot   Soup   Processor    
+   IBM   i   Control   Language    
+   Io          
+   Just   BASIC    
+   K   virtual   machine    
+   Nyquist          
+   OpenCL    
+   PL/C    
+   Pan          
+   Pawn   (scripting   language)    
+   Quark   Framework    
+   Squib   (weblog)    
+   TOM   (object-oriented   programming   language)    
+   Windows   Presentation   Foundation    
+   C3   linearization    
+   CLP(R)    
+   RAPID    
+   Impromptu   (programming   environment)    
+   .QL    
+   Linoleum          
+   Applications-By-Forms    
+   MML          
+   Neko          
+   FACT   (computer   language)    
+   Typed   assembly   language    
+   IBM   ALP    
+   PV-Wave    
+   Pure          
+   Sense   (programming)    
+   Skeleton   (computer   programming)    
+   Speakeasy   (computational   environment)    
+   TXL          
+   ISO/IEC   8652    
+   Micro   programming   language    
+   Bistro          
+   Handel-C    
+   LOOM   (ontology)    
+   Go!          
+   Name   collision    
+   Guido   van   Robot    
+   Jasmin   (software)    
+   Deforestation   (computer   science)    
+   Plus          
+   Soot   (software)    
+   Global   Arrays    
+   Joyce          
+   Fj%C3%B6lnir          
+   Array   access   analysis    
+   Trace   scheduling    
+   PeopleCode    
+   Short   Code   (computer   language)    
+   NetRexx    
+   Frege          
+   C++17    
+   MetaQuotes   Language   MQL4/MQL5    
+   AMPL    
+   Alma-0    
+   C%CF%89    
+   CLISP    
+   Cilk    
+   Claire          
+   ColdFusion   Markup   Language    
+   Felix          
+   Perl   Data   Language    
+   SETL    
+   Unified   Parallel   C    
+   BeanShell    
+   Boo          
+   Charity          
+   Converge          
+   ELAN          
+   E          
+   F-Script          
+   Fortress          
+   FreeBASIC    
+   Harbour   (software)    
+   IKVM.NET    
+   JC   virtual   machine    
+   JamVM    
+   Jaos    
+   Jupiter   JVM    
+   MIVA   Script    
+   Maya   Embedded   Language    
+   Modelica    
+   NWScript    
+   NewLISP    
+   Noop    
+   OpenGL   Shading   Language    
+   Oracle   Developer   Suite    
+   PL/pgSQL    
+   Perl   6    
+   Stackless   Python    
+   Standard   ML   of   New   Jersey    
+   StarLogo    
+   ThinBasic    
+   Turbo   Assembler    
+   X10          
+   ZPL          
+   Little   b          
+   Agda          
+   Chapel          
+   FpgaC    
+   Interactive   C    
+   Karel++    
+   Mudlle    
+   Gambas    
+   ADMB    
+   Axum          
+   Basic4ppc    
+   CLACL    
+   Creative   Basic    
+   Design   By   Numbers    
+   Deterministic   Parallel   Java    
+   Facebook   Query   Language    
+   Microsoft   Small   Basic    
+   NObjective    
+   VSXu    
+   E   Sharp          
+   Frenetic          
+   Nemerle    
+   AIMMS    
+   Ceylon          
+   GNU   E    
+   OpenMx    
+   Seph          
+   SQL   PL    
+   Shift   Script    
+   TclX    
+   Wild   branch    
+   Literal   pool    
+   JSONiq    
+   As-if   rule    
+   XQuery    
+   ANSI-C    
+   CBASIC    
+   Dart,   HTML5    
+   Degrafa    
+   PROC   procedure   language    
+   Coprocess    
+   CEEMAC    
+   ARexx    
+   JavaFX   Script    
+   L-attributed   grammar    
+   PL/M    
+   Urbiscript    
+   AutoLISP    
+   Befunge    
+   Borland   Turbo   C    
+   Curl          
+   Liberty   BASIC    
+   MAD          
+   NewtonScript    
+   Planner          
+   SISAL    
+   Turing          
+   VBScript    
+   Visual   Basic   for   Applications    
+   XSL    
+   Yacc    
+   IBM   High   Level   Assembler    
+   Spec   Sharp    
+   YAAF    
+   %CE%9CC++    
+   Bigwig          
+   Etoys          
+   Fril    
+   JRockit    
+   JavaServer   Pages   Standard   Tag   Library    
+   Join   Java    
+   Nickle          
+   Squirrel          
+   Tea          
+   ToonTalk    
+   VisSim    
+   XL          
+   Yoix    
+   T          
+   Absys    
+   Access   query   language    
+   EM   intermediate   language    
+   GGobi    
+   Judoscript    
+   Cel          
+   Actor-Based   Concurrent   Language    
+   Algebraic   Logic   Functional   programming   language    
+   AmbientTalk    
+   Cobra          
+   Incr   Tcl    
+   Lite-C    
+   Parser   (CGI   language)    
+   Php4delphi    
+   Scientific   Vector   Language    
+   Core   language    
+   Free-form   language    
+   Obliq    
+   Bio7    
+   Cameleon          
+   Coopr    
+   Crypton   (framework)    
+   DADiSP    
+   Flowgorithm    
+   Halide          
+   LARP          
+   Little   Interpreted   Language    
+   Pyomo    
+   Visual   Logic    
+   TELCOMP    
+   Tactile   programming   language    
+   Object   Oberon    
+   Metacompilation    
+   POPLmark   challenge    
+   High-Level   Shading   Language    
+   Concurrent   object-oriented   programming    
+   FutureBASIC    
+   .net    
+   ABAP    
+   ALGOL   68    
+   AppleScript    
+   BETA          
+   CWEB    
+   ChucK    
+   Clipper          
+   ColorForth    
+   Coq    
+   Curry          
+   DBase    
+   D          
+   FASM    
+   F   Sharp          
+   Generic   Java    
+   Groovy          
+   Hartmann   pipeline    
+   Inform    
+   J          
+   J   Sharp    
+   Joy          
+   MIRC   scripting   language    
+   Mizar   system    
+   Modula-3    
+   Pizza          
+   Polyphonic   C   Sharp    
+   Processing          
+   Pure   Data    
+   Q   (equational   programming   language)    
+   R          
+   Ratfor    
+   Rc    
+   SPARK          
+   TADS    
+   UnrealScript    
+   Verilog    
+   XOTcl    
+   XUL    
+   Overhead   code    
+   FL          
+   Intel   Parallel   Building   Blocks    
+   COMTRAN    
+   Ezhil          
+   PersonalJava    
+   Programming   language   implementation    
+   Reference   type    
+   AdvPL    
+   MACRO-10    
+   Python   for   S60    
+   FortranM    
+   Hummingbird   QuickScript    
+   List   of   CLI   languages    
+   S-attributed   grammar    
+   TI   BASIC   (TI   99/4A)    
+   C   Object   Processor    
+   Humus          
+   PROMAL    
+   Babbage          
+   Erroneous   program    
+   Simple   Knowledge   Organization   System    
+   Polymorphic   recursion    
+   WinWrap   Basic    
+   BuddyScript    
+   Acornsoft   Logo    
+   OBJ3    
+   Oaklisp    
+   ObjectLOGO    
+   Object   Lisp    
+   ExtendScript    
+   Slave   Programming   Language   
+   

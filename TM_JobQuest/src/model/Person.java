@@ -40,6 +40,8 @@ public class Person {
     @SerializedName("files")
     @Expose
     private List<File> files = new ArrayList<File>();
+    
+    
 
     /**
      * 
