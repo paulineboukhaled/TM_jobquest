@@ -56,6 +56,7 @@ import ch.qos.logback.classic.LoggerContext;
 import model.Person;
 import model.RequestLabel;
 import model.ResponseLabel;
+import model.Skill;
 import model.Tag;
 import processing.PDFWeigth;
 import processing.SaveOnSesame;
@@ -130,8 +131,32 @@ public class UserInformation {
 		
 		
 		ArrayList<Person> listPerson = sesame.getUser();
+		
+		Gson gson = new GsonBuilder().create();
+		String result = "{";
+		int i = 0;
+		for(Person person : listPerson){
+			result += "\""+i+"\": { \"lastname\":\""+ person.getName()+"\", \"firstname\":\""+ person.getFirstname() +"\", \"position\": \""+(i+1)+"\", \"isSelected\":\"false\", \"skills\":{ \"computer\":{";
+			int j = 0;
+			for(Skill s: person.getSkills()){
+				result+="\""+s.getName()+"\":{ \"years\": "+ s.getYearOfExperience()+", \"level\":"+ s.getLevel()+"}";	
+				if(j != person.getSkills().size()-1){
+					result +=",";
+				}
+				j++;
+			}
+			result+="}}}";
+			if(i != listPerson.size()-1){
+				result +=",";	
+			}
+			i++;
+		}
+		result+="}";
+
+		System.out.println(result);
+		
 				
-		return Response.status(200).entity(listPerson).build();
+		return Response.status(200).entity(result).build();
 	}
 	
 	

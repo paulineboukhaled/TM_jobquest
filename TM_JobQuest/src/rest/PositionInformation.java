@@ -26,6 +26,7 @@ import com.google.gson.GsonBuilder;
 
 import model.Person;
 import model.Position;
+import model.Skill;
 import processing.PDFWeigth;
 import processing.SaveOnSesame;
 import processing.SkillsWeight;
@@ -77,8 +78,31 @@ public class PositionInformation {
 	public Response getList(InputStream incomingData) {
 		
 		
-//		ArrayList<Position> listPosition = sesame.getPositions();
+		ArrayList<Position> listPosition = sesame.getPositions();
 				
-		return Response.status(200).entity("").build();
+		Gson gson = new GsonBuilder().create();
+		String result = "{";
+		int i = 0;
+		for(Position position : listPosition){
+			result += "\""+i+"\": { \"name\":\""+ position.getPosition()+"\", \"position\": \""+(i+1)+"\", \"isSelected\":\"false\" , \"skills\":{ \"computer\":{";
+			int j = 0;
+			for(Skill s: position.getSkills()){
+				result+="\""+s.getName()+"\":{ \"years\": "+ s.getYearOfExperience()+", \"level\":"+ s.getLevel()+"}";	
+				if(j != position.getSkills().size()-1){
+					result +=",";
+				}
+				j++;
+			}
+			result+="}}}";
+			if(i != listPosition.size()-1){
+				result +=",";	
+			}
+			i++;
+		}
+		result+="}";
+
+		System.out.println(result);
+				
+		return Response.status(200).entity(result).build();
 	}
 }

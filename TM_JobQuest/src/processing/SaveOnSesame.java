@@ -267,31 +267,76 @@ public class SaveOnSesame {
 	}
 
 
-	//	public static ArrayList<Position> getPositions() {
-	//
-	//
-	//		Repository repo = new HTTPRepository(constante.Parameter.SESAMESERVER, constante.Parameter.REPOSITORYID);
-	//		repo.initialize();
-	//		ValueFactory f = repo.getValueFactory();
-	//		RepositoryConnection conn = repo.getConnection();
-	//		try {
-	//			String query="Select ?position where {?person <"+RDF.TYPE+"> <"+FOAF.PERSON+">"+
-	//					" . ?person <"+RDFS.LABEL+"> ?name"
-	//					+" . ?person <"+FOAF.FAMILY_NAME+"> ?familyname}";
-	//			System.out.println(query);
-	//			TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
-	//			TupleQueryResult res = result.evaluate();
-	//			while(res.hasNext()){
-	//				BindingSet actualRes = res.next();
-	//				personJohn.setNom(actualRes.getValue("name").stringValue());
-	//				personJohn.setPrenom(actualRes.getValue("familyname").stringValue());
-	//				System.out.println("Name: "+actualRes.getValue("name")+" Family Name:"+actualRes.getValue("familyname"));
-	//			}
-	//
-	//
-	//
-	//			return null;
-	//		}
+		public static ArrayList<Position> getPositions() {
+	
+			
+			ArrayList<Position> listOfPosition = new ArrayList<>();
+			Position devCpp = new Position();
+			devCpp.setPosition("Dev CPP");			
+			Skill java = new Skill();
+			java.setLevel("3");
+			java.setYearOfExperience("1");
+			java.setName("Java_(programming_language)");
+			Skill c = new Skill();
+			c.setLevel("1");
+			c.setYearOfExperience("1");
+			c.setName("C_(programming_language)");
+			Skill php = new Skill();
+			php.setLevel("2");
+			php.setYearOfExperience("3");
+			php.setName("PHP");
+			
+			ArrayList<Skill> listOfSkill = new ArrayList<>();
+			listOfSkill.add(java);
+			listOfSkill.add(c);
+			listOfSkill.add(php);
+
+
+			devCpp.setSkills(listOfSkill);
+			
+			
+			Position ITmanager = new Position();
+			ITmanager.setPosition("IT Manager");
+			ITmanager.setSkills(listOfSkill);
+			
+			Position networkadministrator = new Position();
+			networkadministrator.setPosition("Network Administrateur");
+			networkadministrator.setSkills(listOfSkill);
+			
+			Position jobelca = new Position();
+			jobelca.setPosition("Job Elca");
+			jobelca.setSkills(listOfSkill);
+			
+
+			
+			listOfPosition.add(devCpp);
+			listOfPosition.add(ITmanager);
+			listOfPosition.add(jobelca);
+			listOfPosition.add(networkadministrator);
+
+			
+			return listOfPosition;
+	
+//			Repository repo = new HTTPRepository(constante.Parameter.SESAMESERVER, constante.Parameter.REPOSITORYID);
+//			repo.initialize();
+//			ValueFactory f = repo.getValueFactory();
+//			RepositoryConnection conn = repo.getConnection();
+//			try {
+//				String query="Select ?position where {?person <"+RDF.TYPE+"> <"+FOAF.PERSON+">"+
+//						" . ?person <"+RDFS.LABEL+"> ?name"
+//						+" . ?person <"+FOAF.FAMILY_NAME+"> ?familyname}";
+//				System.out.println(query);
+//				TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
+//				TupleQueryResult res = result.evaluate();
+//				while(res.hasNext()){
+//					BindingSet actualRes = res.next();
+//					personJohn.setNom(actualRes.getValue("name").stringValue());
+//					personJohn.setPrenom(actualRes.getValue("familyname").stringValue());
+//					System.out.println("Name: "+actualRes.getValue("name")+" Family Name:"+actualRes.getValue("familyname"));
+//				}
+//	
+	
+		}
 
 	public static ArrayList<Person> getUser() {
 		
@@ -310,7 +355,7 @@ public class SaveOnSesame {
 		c.setYearOfExperience("1");
 		c.setName("C_(programming_language)");
 		Skill php = new Skill();
-		php.setLevel("5");
+		php.setLevel("0");
 		php.setYearOfExperience("8");
 		php.setName("PHP");
 		
