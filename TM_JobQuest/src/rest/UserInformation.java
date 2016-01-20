@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import javax.print.attribute.standard.Media;
@@ -54,6 +55,7 @@ import com.google.gson.GsonBuilder;
 
 import ch.qos.logback.classic.LoggerContext;
 import model.Person;
+import model.Position;
 import model.RequestLabel;
 import model.ResponseLabel;
 import model.Skill;
@@ -125,12 +127,21 @@ public class UserInformation {
 	}
 	
 	@GET
+	@Path("/globallist")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getGlobalList(InputStream incomingData) throws URISyntaxException {
+		ArrayList<Person> listPosition = sesame.getUsers();
+		Gson gson = new GsonBuilder().create();			
+		return Response.status(200).entity(gson.toJson(listPosition)).build();
+	}
+	
+	@GET
 	@Path("/list")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getList(InputStream incomingData) {
+	public Response getList(InputStream incomingData) throws URISyntaxException {
 		
 		
-		ArrayList<Person> listPerson = sesame.getUser();
+		ArrayList<Person> listPerson = sesame.getUsers();
 		
 		Gson gson = new GsonBuilder().create();
 		String result = "{";

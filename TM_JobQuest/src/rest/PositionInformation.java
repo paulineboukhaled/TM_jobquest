@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -73,9 +74,19 @@ public class PositionInformation {
 	
 	
 	@GET
+	@Path("/globallist")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getGlobalList(InputStream incomingData) throws URISyntaxException {
+		ArrayList<Position> listPosition = sesame.getPositions();
+		Gson gson = new GsonBuilder().create();			
+		return Response.status(200).entity(gson.toJson(listPosition)).build();
+	}
+	
+	
+	@GET
 	@Path("/list")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getList(InputStream incomingData) {
+	public Response getList(InputStream incomingData) throws URISyntaxException {
 		
 		
 		ArrayList<Position> listPosition = sesame.getPositions();

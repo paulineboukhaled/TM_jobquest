@@ -5,6 +5,7 @@ import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.codehaus.jackson.map.introspect.BasicClassIntrospector.GetterMethodFilter;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.FOAF;
@@ -17,7 +18,12 @@ import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.http.HTTPRepository;
+import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import ch.qos.logback.classic.LoggerContext;
 import constante.Parameter;
 import model.File;
 import model.Job;
@@ -35,7 +41,8 @@ public class SaveOnSesame {
 	public SaveOnSesame() {
 		repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
 		repo.initialize();
-		ValueFactory f = repo.getValueFactory();
+
+		f = repo.getValueFactory();
 
 
 		HAS_ADDRESS = f.createURI(Parameter.NAMESPACE, "hasAddress");
@@ -57,6 +64,8 @@ public class SaveOnSesame {
 		REQUIRE_SKILL = f.createURI(Parameter.NAMESPACE, "requireSkill");
 		HAS_TITLE = f.createURI(Parameter.NAMESPACE, "hasTitle");
 		HAS_SPECIALITY = f.createURI(Parameter.NAMESPACE, "hasSpeciality");
+		POSITION =  f.createURI(Parameter.NAMESPACE,"Position");
+
 	}
 
 	public URI HAS_ADDRESS = null;
@@ -78,12 +87,7 @@ public class SaveOnSesame {
 	public URI REQUIRE_SKILL = null;
 	public URI HAS_TITLE = null;
 	public URI HAS_SPECIALITY = null;
-
-
-
-
-
-
+	public URI POSITION = null;
 
 
 
@@ -91,9 +95,8 @@ public class SaveOnSesame {
 		RepositoryConnection conn = repo.getConnection();
 		try {
 			conn.begin();
-
 			Date date = new Date();	
-			String identifier = newCandidat.getName() + date.getTime();
+			String identifier = escape(newCandidat.getName()) + date.getTime();
 			URI candidatSesame = f.createURI(Parameter.NAMESPACE, identifier);
 
 			// Add statements to the rep John is a Person, John's name is John 
@@ -124,9 +127,13 @@ public class SaveOnSesame {
 		} 
 	}
 
+	private String escape(String name) {
+		return name.replaceAll(" ", "");
+	}
+
 	public void saveSkill(Skill skill, URI candidatIdentifier, RepositoryConnection conn, ValueFactory f){
 		Date date = new Date();
-		String identifier = skill.getName() + date.getTime();
+		String identifier = escape(skill.getName()) + date.getTime();
 		URI skillSesame = f.createURI(Parameter.NAMESPACE, identifier);
 		conn.add(candidatIdentifier, HAS_SKILL, skillSesame);
 		conn.add(skillSesame, HAS_NAME, f.createLiteral(skill.getName(), XMLSchema.STRING));
@@ -136,7 +143,7 @@ public class SaveOnSesame {
 
 	public void saveRequiredSkill(Skill skill, URI candidatIdentifier, RepositoryConnection conn, ValueFactory f){
 		Date date = new Date();
-		String identifier = skill.getName() + date.getTime();
+		String identifier = escape(skill.getName()) + date.getTime();
 		URI skillSesame = f.createURI(Parameter.NAMESPACE, identifier);
 		conn.add(candidatIdentifier, REQUIRE_SKILL, skillSesame);
 		conn.add(skillSesame, HAS_NAME, f.createLiteral(skill.getName(), XMLSchema.STRING));
@@ -146,7 +153,7 @@ public class SaveOnSesame {
 
 	public void saveJob(Job job, URI candidatIdentifier, RepositoryConnection conn, ValueFactory f){
 		Date date = new Date();
-		String identifier = job.getPosition() + date.getTime();
+		String identifier = escape(job.getPosition()) + date.getTime();
 		URI jobSesame = f.createURI(Parameter.NAMESPACE, identifier);
 		conn.add(candidatIdentifier, HAS_JOB, jobSesame);
 		conn.add(jobSesame, HAS_POSITION, f.createLiteral(job.getPosition(), XMLSchema.STRING));
@@ -161,7 +168,7 @@ public class SaveOnSesame {
 
 	public void saveSchool(School school, URI candidatIdentifier, RepositoryConnection conn, ValueFactory f){
 		Date date = new Date();
-		String identifier = school.getSchool() + date.getTime();
+		String identifier = escape(school.getSchool()) + date.getTime();
 		URI schoolSesame = f.createURI(Parameter.NAMESPACE, identifier);
 		conn.add(candidatIdentifier, REQUIRE_SCHOOL, schoolSesame);
 		conn.add(schoolSesame, HAS_TITLE, f.createLiteral(school.getTitle(), XMLSchema.STRING));
@@ -173,9 +180,9 @@ public class SaveOnSesame {
 
 	public void savePositionSchool(School school, URI positionIdentifier, RepositoryConnection conn, ValueFactory f){
 		Date date = new Date();
-		String identifier = school.getSchool() + date.getTime();
+		String identifier = escape(school.getSchool()) + date.getTime();
 		URI schoolSesame = f.createURI(Parameter.NAMESPACE, identifier);
-		conn.add(positionIdentifier, HAS_SCHOOL, schoolSesame);
+		conn.add(positionIdentifier, REQUIRE_SCHOOL, schoolSesame);
 		conn.add(schoolSesame, HAS_TITLE, f.createLiteral(school.getTitle(), XMLSchema.STRING));
 		conn.add(schoolSesame, HAS_SCHOOL, f.createLiteral(school.getSchool(), XMLSchema.STRING));
 		conn.add(schoolSesame, HAS_SPECIALITY, f.createLiteral(school.getSpeciality(), XMLSchema.STRING));
@@ -186,13 +193,12 @@ public class SaveOnSesame {
 		RepositoryConnection conn = repo.getConnection();
 		try {
 			conn.begin();
-
 			Date date = new Date();	
-			String identifier = newPosition.getPosition() + date.getTime();
+			String identifier = escape(newPosition.getPosition()) + date.getTime();
 
 			// Add statements to the rep John is a Person, John's name is John 
 			URI jobSesame = f.createURI(Parameter.NAMESPACE, identifier);
-			conn.add(jobSesame, RDF.TYPE, f.createURI(Parameter.NAMESPACE,"Position"));
+			conn.add(jobSesame, RDF.TYPE, POSITION);
 
 			conn.add(jobSesame, HAS_POSITION, f.createLiteral(newPosition.getPosition(), XMLSchema.STRING));
 			conn.add(jobSesame, HAS_EMPLOYER, f.createLiteral(newPosition.getEmployer(), XMLSchema.STRING));
@@ -209,7 +215,6 @@ public class SaveOnSesame {
 				savePositionSchool(school, jobSesame, conn, f);
 			}
 			conn.commit();	
-
 			return jobSesame;
 
 		}catch(Exception e) {
@@ -224,6 +229,9 @@ public class SaveOnSesame {
 	}
 
 	public Skill getSkill(java.net.URI identifier) {
+		/*CONNECTION OPEN*/
+		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
+		repo.initialize();
 		RepositoryConnection conn = repo.getConnection();
 
 		String query="SELECT * WHERE { <"+identifier+"> ?p ?o }";
@@ -237,7 +245,6 @@ public class SaveOnSesame {
 		while(res.hasNext()) {
 			BindingSet actualRes = res.next();			
 			String predicate = actualRes.getValue("p").stringValue();
-
 			String value = actualRes.getValue("o").stringValue();
 			if(predicate.equals(HAS_LEVEL.stringValue())) {
 				skill.setLevel(value);
@@ -248,17 +255,139 @@ public class SaveOnSesame {
 			}
 
 		}
-
+		/*CONNECTION CLOSE*/
+		conn.close();
 		return skill;
+	}
+
+
+	public School getSchool(java.net.URI identifier) {
+		
+		/*CONNECTION OPEN*/
+		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
+		repo.initialize();
+		RepositoryConnection conn = repo.getConnection();
+
+		String query="SELECT * WHERE { <"+identifier+"> ?p ?o }";
+		System.out.println(query);
+
+		TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
+		TupleQueryResult res = result.evaluate();
+
+		School school = new School();
+
+		while(res.hasNext()) {
+			BindingSet actualRes = res.next();			
+			String predicate = actualRes.getValue("p").stringValue();
+			String value = actualRes.getValue("o").stringValue();
+			if(predicate.equals(HAS_TITLE.stringValue())) {
+				school.setTitle(value);
+			} else if(predicate.equals(HAS_SCHOOL.stringValue())) {
+				school.setSchool(value);
+			} else if(predicate.equals(HAS_SPECIALITY.stringValue())) {
+				school.setSpeciality(value);
+			}
+
+		}
+		
+		/*CONNECTION CLOSE*/
+		conn.close();
+		return school;
+	}
+
+
+	public Position getPosition(java.net.URI identifier) throws URISyntaxException {
+		
+		/*CONNECTION OPEN*/
+		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
+		repo.initialize();
+		RepositoryConnection conn = repo.getConnection();
+
+		String query="SELECT * WHERE { <"+identifier+"> ?p ?o }";
+		System.out.println(query);
+
+		TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
+		TupleQueryResult res = result.evaluate();
+
+		Position job = new Position();
+
+		while(res.hasNext()) {
+			BindingSet actualRes = res.next();			
+			String predicate = actualRes.getValue("p").stringValue();
+			String value = actualRes.getValue("o").stringValue();
+			if(predicate.equals(HAS_EMPLOYER.stringValue())) {
+				job.setEmployer(value);
+			} else if(predicate.equals(HAS_POSITION.stringValue())) {
+				job.setPosition(value);
+			} else if(predicate.equals(HAS_DESCRIPTION.stringValue())) {
+				job.setDescription(value);
+			} else if(predicate.equals(HAS_START.stringValue())) {
+				job.setStart(value);
+			} else if(predicate.equals(HAS_END.stringValue())) {
+				job.setEnd(value);
+			} else if(predicate.equals(HAS_NPA.stringValue())) {
+				job.setNpa(value);
+			} else if(predicate.equals(HAS_CITY.stringValue())) {
+				job.setCity(value);
+			} 
+			else if(predicate.equals(REQUIRE_SKILL.stringValue())) {
+				Skill s = getSkill(new java.net.URI(value));
+				job.getSkills().add(s);
+			} 
+			else if(predicate.equals(REQUIRE_SCHOOL.stringValue())) {
+				School s = getSchool(new java.net.URI(value));
+				job.getSchools().add(s);
+			}
+		}
+
+		/*CONNECTION CLOSE*/
+		conn.close();
+		return job;
+	}
+
+	public ArrayList<Position> getPositions() throws URISyntaxException {
+		ArrayList<Position> positions = new ArrayList<>();
+		
+		/*CONNECTION OPEN*/
+		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
+		repo.initialize();
+		RepositoryConnection conn = repo.getConnection();
+
+		String query="SELECT * WHERE { ?s <"+RDF.TYPE+"> <"+POSITION+"> }";
+		System.out.println(query);
+
+		TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
+		TupleQueryResult res = result.evaluate();
+
+		while(res.hasNext()) {
+			BindingSet actualRes = res.next();			
+			String uri = actualRes.getValue("s").stringValue();
+			Position p = getPosition(new java.net.URI(uri));
+			positions.add(p);
+		}
+		
+		/*CONNECTION CLOSE*/
+		conn.close();
+		return positions;
 	}
 
 	public static void main(String [] args) {
 
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		loggerContext.stop();
+
 		SaveOnSesame onSesame = new SaveOnSesame();
 
 		try {
-			Skill s = onSesame.getSkill(new java.net.URI("http://jobquest/skill21453146848023"));
-			System.out.println("");
+			//Skill s = onSesame.getSkill(new java.net.URI("http://jobquest/skill21453146848023"));
+
+			//Position p = onSesame.getPosition(new java.net.URI("http://jobquest/Job11453235330727"));
+
+
+			Gson gson = new GsonBuilder().create();
+
+			//System.out.println(gson.toJson(onSesame.getPositions()));
+			System.out.println(gson.toJson(onSesame.getUsers()));
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -267,123 +396,82 @@ public class SaveOnSesame {
 	}
 
 
-		public static ArrayList<Position> getPositions() {
 	
-			
-			ArrayList<Position> listOfPosition = new ArrayList<>();
-			Position devCpp = new Position();
-			devCpp.setPosition("Dev CPP");			
-			Skill java = new Skill();
-			java.setLevel("3");
-			java.setYearOfExperience("1");
-			java.setName("Java_(programming_language)");
-			Skill c = new Skill();
-			c.setLevel("1");
-			c.setYearOfExperience("1");
-			c.setName("C_(programming_language)");
-			Skill php = new Skill();
-			php.setLevel("2");
-			php.setYearOfExperience("3");
-			php.setName("PHP");
-			
-			ArrayList<Skill> listOfSkill = new ArrayList<>();
-			listOfSkill.add(java);
-			listOfSkill.add(c);
-			listOfSkill.add(php);
 
+	public Person getUser(java.net.URI identifier) throws URISyntaxException {
 
-			devCpp.setSkills(listOfSkill);
-			
-			
-			Position ITmanager = new Position();
-			ITmanager.setPosition("IT Manager");
-			ITmanager.setSkills(listOfSkill);
-			
-			Position networkadministrator = new Position();
-			networkadministrator.setPosition("Network Administrateur");
-			networkadministrator.setSkills(listOfSkill);
-			
-			Position jobelca = new Position();
-			jobelca.setPosition("Job Elca");
-			jobelca.setSkills(listOfSkill);
-			
+		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
+		repo.initialize();
+		RepositoryConnection conn = repo.getConnection();
 
-			
-			listOfPosition.add(devCpp);
-			listOfPosition.add(ITmanager);
-			listOfPosition.add(jobelca);
-			listOfPosition.add(networkadministrator);
+		String query="SELECT * WHERE { <"+identifier+"> ?p ?o }";
+		System.out.println(query);
 
-			
-			return listOfPosition;
-	
-//			Repository repo = new HTTPRepository(constante.Parameter.SESAMESERVER, constante.Parameter.REPOSITORYID);
-//			repo.initialize();
-//			ValueFactory f = repo.getValueFactory();
-//			RepositoryConnection conn = repo.getConnection();
-//			try {
-//				String query="Select ?position where {?person <"+RDF.TYPE+"> <"+FOAF.PERSON+">"+
-//						" . ?person <"+RDFS.LABEL+"> ?name"
-//						+" . ?person <"+FOAF.FAMILY_NAME+"> ?familyname}";
-//				System.out.println(query);
-//				TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
-//				TupleQueryResult res = result.evaluate();
-//				while(res.hasNext()){
-//					BindingSet actualRes = res.next();
-//					personJohn.setNom(actualRes.getValue("name").stringValue());
-//					personJohn.setPrenom(actualRes.getValue("familyname").stringValue());
-//					System.out.println("Name: "+actualRes.getValue("name")+" Family Name:"+actualRes.getValue("familyname"));
-//				}
-//	
-	
+		TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
+		TupleQueryResult res = result.evaluate();
+
+		Person person = new Person();			
+
+		while(res.hasNext()) {
+			BindingSet actualRes = res.next();			
+			String predicate = actualRes.getValue("p").stringValue();
+			String value = actualRes.getValue("o").stringValue();
+			if(predicate.equals(FOAF.NAME.stringValue())) {
+				person.setName(value);
+			} else if(predicate.equals(FOAF.FIRST_NAME.stringValue())) {
+				person.setFirstname(value);
+			} else if(predicate.equals(FOAF.BIRTHDAY.stringValue())) {
+				person.setBirthdate(value);
+			} else if(predicate.equals(HAS_ADDRESS.stringValue())) {
+				person.setAddress(value);
+			} else if(predicate.equals(HAS_NPA.stringValue())) {
+				person.setNpa(value);
+			} else if(predicate.equals(HAS_CITY.stringValue())) {
+				person.setCity(value);
+			} else if(predicate.equals(HAS_FILE.stringValue())) {
+				File f = new File();
+				f.setId(value);
+				person.getFiles().add(f);
+			} else if(predicate.equals(REQUIRE_SCHOOL.stringValue())) {
+				School f = getSchool(new java.net.URI(value));
+				person.getSchools().add(f);
+			} else if(predicate.equals(HAS_SKILL.stringValue())) {
+				Skill s = getSkill(new java.net.URI(value));
+				person.getSkills().add(s);
+			} 
 		}
 
-	public static ArrayList<Person> getUser() {
-		
-		
-		ArrayList<Person> listOfUser = new ArrayList<>();
-		Person paulineboukhaled = new Person();
-		paulineboukhaled.setName("Bou Khaled");
-		paulineboukhaled.setFirstname("Pauline");
-		
-		Skill java = new Skill();
-		java.setLevel("3");
-		java.setYearOfExperience("2");
-		java.setName("Java_(programming_language)");
-		Skill c = new Skill();
-		c.setLevel("2");
-		c.setYearOfExperience("1");
-		c.setName("C_(programming_language)");
-		Skill php = new Skill();
-		php.setLevel("0");
-		php.setYearOfExperience("8");
-		php.setName("PHP");
-		
-		ArrayList<Skill> listOfSkill = new ArrayList<>();
-		listOfSkill.add(java);
-		listOfSkill.add(c);
-		listOfSkill.add(php);
+
+		conn.close();
+		return person;
+
+	}
 
 
-		paulineboukhaled.setSkills(listOfSkill);
-		
-		
-		Person paulinemarmet = new Person();
-		paulinemarmet.setName("Marmet");
-		paulinemarmet.setFirstname("Pauline");
-		paulinemarmet.setSkills(listOfSkill);
-		
-		Person blancheponroy = new Person();
-		blancheponroy.setName("Ponroy");
-		blancheponroy.setFirstname("Blanche");
-		blancheponroy.setSkills(listOfSkill);
-		
-		listOfUser.add(paulineboukhaled);
-		listOfUser.add(paulinemarmet);
-		listOfUser.add(blancheponroy);
-		
-		return listOfUser;
+	public ArrayList<Person> getUsers() throws URISyntaxException {
+		ArrayList<Person> users = new ArrayList<>();
 
+		/*CONNECTION OPEN*/
+		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
+		repo.initialize();
+		RepositoryConnection conn = repo.getConnection();
+
+		String query="SELECT * WHERE { ?s <"+RDF.TYPE+"> <"+FOAF.PERSON+"> }";
+		System.out.println(query);
+
+		TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
+		TupleQueryResult res = result.evaluate();
+
+		while(res.hasNext()) {
+			BindingSet actualRes = res.next();			
+			String uri = actualRes.getValue("s").stringValue();
+			Person p = getUser(new java.net.URI(uri));
+			users.add(p);
+		}
+
+		/*CONNECTION CLOSE*/
+		conn.close();
+		return users;
 	}
 
 
