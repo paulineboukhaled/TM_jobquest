@@ -9,6 +9,10 @@ import com.google.gson.annotations.SerializedName;
 @Generated("org.jsonschema2pojo")
 public class Position {
 
+	
+	@SerializedName("uri")
+    @Expose
+    private String uri;
 	@SerializedName("position")
 	@Expose
 	private String position;
@@ -37,6 +41,15 @@ public class Position {
 	@Expose
 	private List<School> schools = new ArrayList<School>();
 
+	
+	public String getUri() {
+		return uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+	
 	/**
 	 * 
 	 * @return

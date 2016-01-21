@@ -122,6 +122,9 @@ public class UserInformation {
 		HashMap<String, Double> hashmapFinal = SkillsWeight.mergeSkillAndPDF(weigthSkills, weightPDFs);
 		System.out.println(hashmapFinal);
 		
+		 sesame.saveHM(identifier, hashmapFinal);
+
+		
 		// return HTTP response 200 in case of success
 		return Response.status(200).entity(crunchifyBuilder.toString()).build();
 	}

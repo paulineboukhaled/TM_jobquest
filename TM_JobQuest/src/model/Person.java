@@ -10,7 +10,10 @@ import com.google.gson.annotations.SerializedName;
 @Generated("org.jsonschema2pojo")
 public class Person {
 
-    @SerializedName("name")
+	@SerializedName("uri")
+    @Expose
+    private String uri;
+	@SerializedName("name")
     @Expose
     private String name;
     @SerializedName("firstname")
@@ -42,6 +45,14 @@ public class Person {
     private List<File> files = new ArrayList<File>();
     
     
+    
+    public String getUri() {
+		return uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
 
     /**
      * 

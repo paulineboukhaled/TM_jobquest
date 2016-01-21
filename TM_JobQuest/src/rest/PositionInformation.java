@@ -68,6 +68,9 @@ public class PositionInformation {
 		
 		HashMap<String, Double> weigthSkills = SkillsWeight.getAllSkillsWeight(newPosition.getSkills());
 		System.out.println(weigthSkills);		
+		
+		 sesame.saveHM(identifier,weigthSkills);
+
 		// return HTTP response 200 in case of success
 		return Response.status(200).entity(crunchifyBuilder.toString()).build();
 	}

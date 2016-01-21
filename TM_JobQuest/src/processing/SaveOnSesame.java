@@ -4,6 +4,7 @@ import java.net.URISyntaxException;
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 import org.codehaus.jackson.map.introspect.BasicClassIntrospector.GetterMethodFilter;
 import org.openrdf.model.URI;
@@ -65,6 +66,10 @@ public class SaveOnSesame {
 		HAS_TITLE = f.createURI(Parameter.NAMESPACE, "hasTitle");
 		HAS_SPECIALITY = f.createURI(Parameter.NAMESPACE, "hasSpeciality");
 		POSITION =  f.createURI(Parameter.NAMESPACE,"Position");
+		REQUIRE_HM =  f.createURI(Parameter.NAMESPACE,"requireHM");
+		HAS_WEIGHT =  f.createURI(Parameter.NAMESPACE,"hasWeight");
+
+
 
 	}
 
@@ -88,6 +93,10 @@ public class SaveOnSesame {
 	public URI HAS_TITLE = null;
 	public URI HAS_SPECIALITY = null;
 	public URI POSITION = null;
+	public URI REQUIRE_HM = null;
+	public URI HAS_WEIGHT = null;
+
+
 
 
 
@@ -310,7 +319,7 @@ public class SaveOnSesame {
 		TupleQueryResult res = result.evaluate();
 
 		Position job = new Position();
-
+		job.setUri(identifier.toString());
 		while(res.hasNext()) {
 			BindingSet actualRes = res.next();			
 			String predicate = actualRes.getValue("p").stringValue();
@@ -411,7 +420,7 @@ public class SaveOnSesame {
 		TupleQueryResult res = result.evaluate();
 
 		Person person = new Person();			
-
+		person.setUri(identifier.toString());
 		while(res.hasNext()) {
 			BindingSet actualRes = res.next();			
 			String predicate = actualRes.getValue("p").stringValue();
@@ -440,7 +449,6 @@ public class SaveOnSesame {
 				person.getSkills().add(s);
 			} 
 		}
-
 
 		conn.close();
 		return person;
@@ -472,6 +480,114 @@ public class SaveOnSesame {
 		/*CONNECTION CLOSE*/
 		conn.close();
 		return users;
+	}
+
+	public HashMap<String, Double> getHMPosition(String positionId) {
+		return getSingleHM(positionId);
+	}
+	
+	public HashMap<String, Double> getSingleHM(String Id) {
+		/*CONNECTION OPEN*/
+		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
+		repo.initialize();
+		RepositoryConnection conn = repo.getConnection();
+		
+		String query="SELECT ?n ?w WHERE { <"+Id+">  <"+REQUIRE_HM+"> ?s. ?s <"+HAS_NAME+"> ?n . ?s <"+HAS_WEIGHT+"> ?w}";
+		System.out.println(query);
+
+		TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
+		TupleQueryResult res = result.evaluate();
+
+		HashMap<String, Double> HM = new HashMap<>();
+		while(res.hasNext()) {
+			BindingSet actualRes = res.next();	
+			String n = actualRes.getValue("n").stringValue();
+			double  w = Double.parseDouble(actualRes.getValue("w").stringValue());
+			HM.put(n, w);
+		}	
+		/*CONNECTION CLOSE*/
+		conn.close();
+		return HM;	
+	}
+
+	public HashMap<String, Double> getHMUser(String personId) {
+		return getSingleHM(personId);
+	}
+
+	public HashMap<String, HashMap<String, Double>> getAllHMUsers() {
+		HashMap<String, HashMap<String, Double>> users = new HashMap<>();
+
+		/*CONNECTION OPEN*/
+		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
+		repo.initialize();
+		RepositoryConnection conn = repo.getConnection();
+
+		String query="SELECT * WHERE { ?s <"+RDF.TYPE+"> <"+FOAF.PERSON+"> }";
+		System.out.println(query);
+
+		TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
+		TupleQueryResult res = result.evaluate();
+
+		while(res.hasNext()) {
+			BindingSet actualRes = res.next();			
+			String uri = actualRes.getValue("s").stringValue();
+			HashMap<String, Double> skillsComputed = getHMUser(uri);
+			users.put(uri, skillsComputed);
+		}
+
+		/*CONNECTION CLOSE*/
+		conn.close();
+		return users;
+	}
+
+
+	public HashMap<String, HashMap<String, Double>> getAllHMPositions() {
+		HashMap<String, HashMap<String, Double>> positions = new HashMap<>();
+
+		/*CONNECTION OPEN*/
+		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
+		repo.initialize();
+		RepositoryConnection conn = repo.getConnection();
+
+		String query="SELECT * WHERE { ?s <"+RDF.TYPE+"> <"+POSITION+"> }";
+		System.out.println(query);
+
+		TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
+		TupleQueryResult res = result.evaluate();
+
+		while(res.hasNext()) {
+			BindingSet actualRes = res.next();			
+			String uri = actualRes.getValue("s").stringValue();
+			HashMap<String, Double> skillsComputed = getHMPosition(uri);
+			positions.put(uri, skillsComputed);
+		}
+
+		/*CONNECTION CLOSE*/
+		conn.close();
+		return positions;
+	}
+
+	public void saveHM(URI identifier, HashMap<String, Double> hashmapFinal) {
+		RepositoryConnection conn = repo.getConnection();
+		try {
+			conn.begin();
+			Date date = new Date();	
+			
+			for(String hash : hashmapFinal.keySet()){
+				String idSkillComputed = escape(hash) + date.getTime();
+				URI uriSkillComputed = f.createURI(Parameter.NAMESPACE, idSkillComputed);
+				conn.add(identifier, REQUIRE_HM,uriSkillComputed);
+				conn.add(uriSkillComputed, HAS_NAME,  f.createLiteral(hash, XMLSchema.STRING));
+				conn.add(uriSkillComputed, HAS_WEIGHT, f.createLiteral(hashmapFinal.get(hash)));
+
+				
+			}
+			conn.commit();	
+		}finally{
+			conn.close();
+		} 
+		
+		
 	}
 
 
