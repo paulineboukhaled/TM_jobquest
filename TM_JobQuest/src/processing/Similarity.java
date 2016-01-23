@@ -10,6 +10,7 @@ import upload.CosineSimilarity;
 
 public class Similarity {
 
+
 	public static List<OutputPersonSimilarity> processSimilarityFromPosition(String positionId) {
 		SaveOnSesame sesame = new SaveOnSesame();
 

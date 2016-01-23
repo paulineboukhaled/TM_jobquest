@@ -97,9 +97,6 @@ public class SaveOnSesame {
 	public URI HAS_WEIGHT = null;
 
 
-
-
-
 	public  URI saveCandidat(Person newCandidat){
 		RepositoryConnection conn = repo.getConnection();
 		try {
@@ -378,34 +375,7 @@ public class SaveOnSesame {
 		/*CONNECTION CLOSE*/
 		conn.close();
 		return positions;
-	}
-
-	public static void main(String [] args) {
-
-		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-		loggerContext.stop();
-
-		SaveOnSesame onSesame = new SaveOnSesame();
-
-		try {
-			//Skill s = onSesame.getSkill(new java.net.URI("http://jobquest/skill21453146848023"));
-
-			//Position p = onSesame.getPosition(new java.net.URI("http://jobquest/Job11453235330727"));
-
-
-			Gson gson = new GsonBuilder().create();
-
-			//System.out.println(gson.toJson(onSesame.getPositions()));
-			System.out.println(gson.toJson(onSesame.getUsers()));
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-
-	
+	}	
 
 	public Person getUser(java.net.URI identifier) throws URISyntaxException {
 

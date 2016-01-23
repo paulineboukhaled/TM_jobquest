@@ -79,8 +79,8 @@ public class SkillsWeight {
 	static HashMap<String, Double> map2 = new HashMap<String, Double>();
 
 	static ArrayList<SkillCompute> listOfSkill = new ArrayList<>();
-	static final int MAX_RESULT = 20;
-	public static final int LEVEL = 1;
+	static final int MAX_RESULT = 100;
+	public static final int LEVEL = 2;
 
 	static int count = 0;
 
@@ -94,10 +94,11 @@ public class SkillsWeight {
 		loggerContext.stop();		
 		for(Skill s : listOfSkills){
 			System.out.println(s.getName());
-			map.put(s.getName(), 1.0);
-			getInfluencedBy("http://dbpedia.org/resource/"+s.getName(), "0", LEVEL, 1);
-			getInfluenced("http://dbpedia.org/resource/"+s.getName(), "0", LEVEL, 1);
-			getParadigm("http://dbpedia.org/resource/"+s.getName(), "0", LEVEL, 1);	
+			double weight =  Double.parseDouble(s.getLevel()) *Double.parseDouble(s.getYearOfExperience());
+			map.put(s.getName(), weight);
+			getInfluencedBy("http://dbpedia.org/resource/"+s.getName(), "0", LEVEL, weight);
+			getInfluenced("http://dbpedia.org/resource/"+s.getName(), "0", LEVEL, weight);
+			getParadigm("http://dbpedia.org/resource/"+s.getName(), "0", LEVEL, weight);	
 		}
 		
 		writeCache();

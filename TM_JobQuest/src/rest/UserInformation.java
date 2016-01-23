@@ -142,8 +142,6 @@ public class UserInformation {
 	@Path("/list")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getList(InputStream incomingData) throws URISyntaxException {
-		
-		
 		ArrayList<Person> listPerson = sesame.getUsers();
 		
 		Gson gson = new GsonBuilder().create();
@@ -177,26 +175,10 @@ public class UserInformation {
 	
 	
 
-//
-//	$scope.candidats = {
-//			0:{
-//		firstname:"Pauline",
-//		lastname:"Bou Khaled",
-//		position: 10,
-//		skills:{
-//		computer:{
-//		"java":{
-//		years:2,
-//		level: 1
-//	},
-//		"cpp":{
-//		years:4,
-//		level: 2
-//	},
-//		"html":{
-//		years:10,
-//		level: 1
-//	},
+
+
+	
+	
 //		"css":{
 //		years:1,
 //		level: 2

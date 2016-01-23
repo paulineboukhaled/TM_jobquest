@@ -3,6 +3,9 @@ package rest;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -57,8 +60,18 @@ public class Matching {
 		InputPositionId inputPositionId = gson.fromJson(incomingData, InputPositionId.class);
 		
 		List<OutputPersonSimilarity> outputPersonSimilarities = Similarity.processSimilarityFromPosition(inputPositionId.positionId);
+		Collections.sort(outputPersonSimilarities, OutputPersonSimilarity.Comparators.SIM);
+		List<OutputPersonSimilarity> output = new ArrayList<>(); 
+		int i = 0;
+		for(OutputPersonSimilarity outputPersonSimilaritie : outputPersonSimilarities){
+			output.add(outputPersonSimilaritie);
+			if(i == inputPositionId.numberOfResults-1){
+				break;
+			}
+			i++;
+		}
 
-		return Response.status(200).entity(gson.toJson(outputPersonSimilarities)).build();
+		return Response.status(200).entity(gson.toJson(output)).build();
 	}
 	
 	
@@ -90,9 +103,22 @@ public class Matching {
 		
 		InputPersonId inputPersonId = gson.fromJson(incomingData, InputPersonId.class);
 		
-		List<OutputPositionSimilarity> OutputPositionSimilarities = Similarity.processSimilarityFromPerson(inputPersonId.personId);
+		List<OutputPositionSimilarity> outputPositionSimilarities = Similarity.processSimilarityFromPerson(inputPersonId.personId);
+		Collections.sort(outputPositionSimilarities, Collections.reverseOrder(OutputPositionSimilarity.Comparators.SIM));
 		
-		return Response.status(200).entity(gson.toJson(OutputPositionSimilarities)).build();
+		List<OutputPositionSimilarity> output = new ArrayList<>(); 
+		int i = 0;
+		for(OutputPositionSimilarity outputPersonSimilaritie : outputPositionSimilarities){
+			output.add(outputPersonSimilaritie);
+			if(i == inputPersonId.numberOfResults-1){
+				break;
+			}
+			i++;
+
+		}
+		
+		
+		return Response.status(200).entity(gson.toJson(output)).build();
 
 	}
 
