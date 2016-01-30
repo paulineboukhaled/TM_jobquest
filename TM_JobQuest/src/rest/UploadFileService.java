@@ -38,6 +38,7 @@ public class UploadFileService {
 		String output = "File uploaded to : " + uploadedFileLocation;
 
 		System.out.println(output);
+		System.out.println("{\"id\": \""+uploadedFileLocation+"\", \"name\":\""+fileDetail.getFileName()+"\" }");
 		
 		return Response.status(200).entity("{\"id\": \""+uploadedFileLocation+"\", \"name\":\""+fileDetail.getFileName()+"\" }").build();
 

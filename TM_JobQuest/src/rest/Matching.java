@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonAnyFormatVisitor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import model.InputPersonId;
 import model.InputPositionId;
 import model.Position;
@@ -54,7 +55,6 @@ public class Matching {
 	@Path("/position")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response findBestUsersforPosition(String incomingData) {
-
 		Gson gson = new GsonBuilder().create();
 		
 		InputPositionId inputPositionId = gson.fromJson(incomingData, InputPositionId.class);
@@ -106,6 +106,7 @@ public class Matching {
 		List<OutputPositionSimilarity> outputPositionSimilarities = Similarity.processSimilarityFromPerson(inputPersonId.personId);
 		Collections.sort(outputPositionSimilarities, Collections.reverseOrder(OutputPositionSimilarity.Comparators.SIM));
 		
+		
 		List<OutputPositionSimilarity> output = new ArrayList<>(); 
 		int i = 0;
 		for(OutputPositionSimilarity outputPersonSimilaritie : outputPositionSimilarities){
@@ -117,6 +118,8 @@ public class Matching {
 
 		}
 		
+		System.out.println(gson.toJson(output).toString());
+
 		
 		return Response.status(200).entity(gson.toJson(output)).build();
 
