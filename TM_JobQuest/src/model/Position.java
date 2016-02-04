@@ -39,7 +39,7 @@ public class Position {
 	private List<Skill> skills = new ArrayList<Skill>();
 	@SerializedName("schools")
 	@Expose
-	private List<School> schools = new ArrayList<School>();
+	private List<SchoolPosition> schools = new ArrayList<SchoolPosition>();
 
 	
 	public String getUri() {
@@ -199,7 +199,7 @@ public class Position {
 	 * @return
 	 * The schools
 	 */
-	public List<School> getSchools() {
+	public List<SchoolPosition> getSchoolPositions() {
 		return schools;
 	}
 
@@ -208,7 +208,7 @@ public class Position {
 	 * @param schools
 	 * The schools
 	 */
-	public void setSchools(List<School> schools) {
+	public void setSchools(List<SchoolPosition> schools) {
 		this.schools = schools;
 	}
 

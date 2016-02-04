@@ -1,3 +1,4 @@
+package rest;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
@@ -13,7 +14,7 @@ public class CrossDomainFilter implements ContainerResponseFilter {
      */
     public ContainerResponse filter(ContainerRequest creq, ContainerResponse cres) {
         Response.ResponseBuilder resp = Response.fromResponse(cres.getResponse());
-        resp.header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        resp.header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
         String reqHead = creq.getHeaderValue("Access-Control-Request-Headers");
 

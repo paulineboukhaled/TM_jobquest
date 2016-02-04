@@ -14,11 +14,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import javax.print.attribute.standard.Media;
-import javax.websocket.server.PathParam;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -63,6 +65,7 @@ import model.Tag;
 import processing.PDFWeigth;
 import processing.SaveOnSesame;
 import processing.SkillsWeight;
+import processing.SkillsWeight2;
 import upload.UploadPDF;
 
 @Path("/user")
@@ -99,7 +102,7 @@ public class UserInformation {
 			return Response.status(500).build();
 		}
 		
-		HashMap<String, Double> weigthSkills = SkillsWeight.getAllSkillsWeight(newCandidat.getSkills());
+		HashMap<String, Double> weigthSkills = SkillsWeight2.getAllSkillsWeight(newCandidat.getSkills());
 		System.out.println(weigthSkills);
 		HashMap<String, Long> weightPDFs = new HashMap<>();
 		for(model.File nameFile: newCandidat.getFiles()){
@@ -128,6 +131,96 @@ public class UserInformation {
 		// return HTTP response 200 in case of success
 		return Response.status(200).entity(crunchifyBuilder.toString()).build();
 	}
+	
+	
+	@PUT
+	@Path("/getForm/{id}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response modifyInformation(@PathParam("id") String id, InputStream incomingData) throws URISyntaxException {
+		StringBuilder crunchifyBuilder = new StringBuilder();
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				crunchifyBuilder.append(line);
+			}
+		} catch (Exception e) {
+			System.err.println("Error Parsing: - ");
+		}
+		System.out.println("Data Received2: " + crunchifyBuilder.toString());
+		
+		
+		java.net.URI uri = new java.net.URI("http://jobquest/"+ id);
+		
+		sesame.deleteUserPosition(uri);
+		
+		Gson gson = new GsonBuilder().create();
+		
+		Person newCandidat = gson.fromJson(crunchifyBuilder.toString(), Person.class);
+		
+		URI identifier = sesame.saveCandidat(newCandidat, id);
+
+		if(identifier==null){
+			return Response.status(500).build();
+		}
+		
+		HashMap<String, Double> weigthSkills = SkillsWeight2.getAllSkillsWeight(newCandidat.getSkills());
+		System.out.println(weigthSkills);
+		HashMap<String, Long> weightPDFs = new HashMap<>();
+		for(model.File nameFile: newCandidat.getFiles()){
+			File f = new File(nameFile.getId());
+			try {
+				HashMap<String, Long> weightPDFs_ = PDFWeigth.getHashMapAttachedFiles(f);
+				for(String key : weightPDFs_.keySet()){
+					if(weightPDFs.containsKey(key)){
+						weightPDFs.put(key, weightPDFs.get(key)+weightPDFs_.get(key));
+					}else{
+						weightPDFs.put(key, weightPDFs_.get(key));
+					}
+				}	
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+		
+		HashMap<String, Double> hashmapFinal = SkillsWeight.mergeSkillAndPDF(weigthSkills, weightPDFs);
+		System.out.println(hashmapFinal);
+		
+		 sesame.saveHM(identifier, hashmapFinal);
+
+		
+		// return HTTP response 200 in case of success
+		return Response.status(200).entity(crunchifyBuilder.toString()).build();
+	}
+	
+	@GET
+	@Path("/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getCandidat(@PathParam("id") String id) throws URISyntaxException   {
+		java.net.URI uri = new java.net.URI("http://jobquest/"+ id);
+		Person person = sesame.getUser(uri);
+		
+		Gson gson = new GsonBuilder().create();			
+		return Response.status(200).entity(gson.toJson( person)).build();
+	}
+	
+	@DELETE
+	@Path("/{id}")
+	public Response deleteCandidat(@PathParam("id") String id) throws URISyntaxException   {
+		java.net.URI uri = new java.net.URI("http://jobquest/"+ id);
+		System.out.println(uri.toString());
+		try {
+			sesame.deleteUserPosition(uri);
+		} catch(Exception e) {
+		
+		}
+		return Response.status(200).build();
+		
+		
+	}
+	
+
 	
 	@GET
 	@Path("/globallist")
@@ -173,218 +266,5 @@ public class UserInformation {
 	
 	
 	
-	
-
-
-
-	
-	
-//		"css":{
-//		years:1,
-//		level: 2
-//	}
-//	}
-//	},
-//		isSelected: true
-//	},
-//
-//
-//	}
-
-	
-//	@POST
-//	@Path("/RestService")
-//	@Consumes(MediaType.APPLICATION_JSON)
-//	public Response getWords(InputStream incomingData) {
-//		StringBuilder crunchifyBuilder = new StringBuilder();
-//		try {
-//			BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
-//			String line = null;
-//			while ((line = in.readLine()) != null) {
-//				crunchifyBuilder.append(line);
-//			}
-//		} catch (Exception e) {
-//			System.out.println("Error Parsing: - ");
-//		}
-//		System.out.println("Data Received2: " + crunchifyBuilder.toString());
-//		// return HTTP response 200 in case of success
-//		return Response.status(200).entity(crunchifyBuilder.toString()).build();
-//	}
-	
-	
-
-
-//	@POST
-//	@Path("/spotlight")
-//	@Produces(MediaType.APPLICATION_ATOM_XML)
-//	public Response getAnnotations(InputStream incomingData) throws ClientProtocolException, IOException {
-//		String url = "http://spotlight.sztaki.hu:2222/rest/annotate?text=Michelle%20Obama%20called%20Thursday%20on%20Congress%20to%20extend%20a%20tax%20break%20for%20students%20included%20in%20last%20year%27s%20economic%20stimulus%20package,%20arguing%20that%20the%20policy%20provides%20more%20generous%20assistance.&confidence=0.2&support=20";
-//		System.out.println("spotligth lauched");
-//		//return HTTP response 200 in case of success
-//		HttpClient client = new DefaultHttpClient();
-//		HttpGet request = new HttpGet(url);
-//		request.addHeader("accept", "application/json");
-//		System.out.println("spotligth lauched2");
-//		HttpResponse response = client.execute(request);
-//		System.out.println("spotligth lauched3");
-//
-//		BufferedReader rd = new BufferedReader (new InputStreamReader(response.getEntity().getContent()));
-//		String line = "";
-//		String result="";
-//		while ((line = rd.readLine()) != null) {
-//			result+=line;
-//			System.out.println(line);
-//		}
-//		return Response.status(200).entity(result).build();
-//	}
-
-//	@POST
-//	@Path("/post")
-//	@Consumes(MediaType.APPLICATION_JSON)
-//	public String createDataInJSON(String data) { 
-//
-//		String result = data;
-//
-//		Gson gson = new Gson();
-//		//convert the json string back to object
-//		Person obj = gson.fromJson(data, Person.class);
-//
-//		System.out.println(obj.getNom());
-//
-//		String sesameServer = "http://semantic.ilab-research.ch:8080/openrdf-sesame/";
-//		String repositoryID = "titi";
-//
-//		Repository repo = new HTTPRepository(sesameServer, repositoryID);
-//		repo.initialize();
-//		ValueFactory f = repo.getValueFactory();
-//		String namespace ="http://hf.ch/";
-//		RepositoryConnection conn = repo.getConnection();
-//		try {
-//			conn.begin();
-//			URI newPerson = f.createURI(namespace, obj.getNom());
-//			// Add statements to the rep John is a Person, John's name is John 
-//			conn.add(newPerson, RDF.TYPE, FOAF.PERSON);
-//			conn.add(newPerson, RDFS.LABEL, f.createLiteral(obj.getNom(), XMLSchema.STRING));		
-//			conn.add(newPerson, FOAF.FAMILY_NAME, f.createLiteral(obj.getPrenom(), XMLSchema.STRING));
-//			conn.add(newPerson, FOAF.MEMBER, f.createLiteral("true", XMLSchema.BOOLEAN));
-//			conn.commit();		
-//		}finally{
-//			conn.close();
-//		} 
-//		//System.out.println(result);
-//		return result; 
-//	}
-//
-//	@POST
-//	@Path("/delete")
-//	@Consumes(MediaType.APPLICATION_JSON)
-//	public String deleteDataInJSON(String data) { 
-//
-//		String result = data;
-//
-//		Gson gson = new Gson();
-//		//convert the json string back to object
-//		Person obj = gson.fromJson(data, Person.class);
-//
-//		System.out.println(obj.getNom());
-//
-//		String sesameServer = "http://semantic.ilab-research.ch:8080/openrdf-sesame/";
-//		String repositoryID = "titi";
-//
-//		Repository repo = new HTTPRepository(sesameServer, repositoryID);
-//		repo.initialize();
-//		ValueFactory f = repo.getValueFactory();
-//		String namespace ="http://hf.ch/";
-//		RepositoryConnection conn = repo.getConnection();
-//		try {
-//			conn.begin();
-//			URI newPerson = f.createURI(namespace, obj.getNom());
-//			// Add statements to the rep John is a Person, John's name is John 
-//			//conn.add(newPerson, FOAF.MEMBER, f.createLiteral("false", XMLSchema.BOOLEAN));
-//			conn.commit();		
-//		}finally{
-//			conn.close();
-//		} 
-//		//System.out.println(result);
-//		return result; 
-//	}
-
-
-
-//
-//	@GET
-//	@Path("/")
-//	@Produces(MediaType.APPLICATION_JSON)
-//	public Response listTags(@QueryParam("skill") String id) throws IOException {		
-//		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-//		loggerContext.stop();
-//		System.out.println(id);
-//		SkillsWeight.map.put(id, 1.0);
-//		SkillsWeight.getInfluencedBy("http://dbpedia.org/resource/"+id, "0", SkillsWeight.LEVEL, 1);
-//		for (String mapKey : SkillsWeight.map.keySet()) {
-//			System.out.println(mapKey+" a "+ SkillsWeight.map.get(mapKey));
-//		}
-//		
-//		for (String mapKey : UploadPDF.getFrequency().keySet()) {
-//			if(SkillsWeight.map.containsKey(mapKey)){
-//				SkillsWeight.map.put(mapKey, SkillsWeight.map.get(mapKey)+UploadPDF.getFrequency().get(mapKey));
-//			}else{
-//				SkillsWeight.map.put(mapKey, (double)UploadPDF.getFrequency().get(mapKey));
-//			}
-//		}
-//
-//		SkillsWeight.ValueComparator comparateur = new SkillsWeight.ValueComparator(SkillsWeight.map);
-//		TreeMap<String,Double> mapTriee = new TreeMap<String,Double>(comparateur);
-//		mapTriee.putAll(SkillsWeight.map);
-//		ArrayList<Tag> finalTags = new ArrayList<>();
-//		int count = 0;
-//		for (String mapKey : mapTriee.keySet()) {
-//			if(count<mapTriee.size() && count<NUMBER_OF_TAGS){
-//				count++;
-//				Tag tg= new Tag(mapKey);
-//				finalTags.add(tg);
-//			}
-//		}
-//		return Response.status(200).entity(finalTags).build();
-//	}
-
-//	@GET
-//	@Path("/listPerson")
-//	@Produces(MediaType.APPLICATION_JSON)
-//	public Response listPerson(InputStream incomingData) {
-//		String sesameServer = "http://semantic.ilab-research.ch:8080/openrdf-sesame/";
-//		String repositoryID = "titi";
-//		Repository repo = new HTTPRepository(sesameServer, repositoryID);
-//		repo.initialize();
-//		ValueFactory f = repo.getValueFactory();
-//		RepositoryConnection conn = repo.getConnection();
-//		ArrayList<Person> listpersons = new ArrayList<Person>();
-//		try {
-//			conn.begin();
-//			String query="Select ?name ?familyname ?member where {?person <"+RDF.TYPE+"> <"+FOAF.PERSON+">"+
-//					" . ?person <"+RDFS.LABEL+"> ?name"
-//					+" . ?person <"+FOAF.FAMILY_NAME+"> ?familyname"
-//					+" . ?person <"+FOAF.MEMBER+"> ?member}";
-//			System.out.println(query);
-//			TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
-//			TupleQueryResult res = result.evaluate();
-//			while(res.hasNext()){
-//				BindingSet actualRes = res.next();
-//				Person personJohn = new Person();
-//				if(actualRes.getValue("member").stringValue().compareTo("true")==0){
-//					personJohn.setNom(actualRes.getValue("name").stringValue());
-//					personJohn.setPrenom(actualRes.getValue("familyname").stringValue());
-//					System.out.println("Name: "+actualRes.getValue("name").stringValue()+" Family Name:"+actualRes.getValue("familyname").stringValue());
-//					listpersons.add(personJohn);
-//				}
-//			}
-//			conn.commit();
-//		}finally{
-//			conn.close();
-//		}
-//		return Response.status(200).entity(listpersons).build();
-//	}
-
-
 
 }

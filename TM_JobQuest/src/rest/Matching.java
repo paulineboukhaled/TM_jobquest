@@ -60,7 +60,8 @@ public class Matching {
 		InputPositionId inputPositionId = gson.fromJson(incomingData, InputPositionId.class);
 		
 		List<OutputPersonSimilarity> outputPersonSimilarities = Similarity.processSimilarityFromPosition(inputPositionId.positionId);
-		Collections.sort(outputPersonSimilarities, OutputPersonSimilarity.Comparators.SIM);
+		Collections.sort(outputPersonSimilarities, Collections.reverseOrder(OutputPersonSimilarity.Comparators.SIM));
+		//Collections.sort(outputPersonSimilarities, OutputPersonSimilarity.Comparators.SIM);
 		List<OutputPersonSimilarity> output = new ArrayList<>(); 
 		int i = 0;
 		for(OutputPersonSimilarity outputPersonSimilaritie : outputPersonSimilarities){
@@ -105,7 +106,8 @@ public class Matching {
 		
 		List<OutputPositionSimilarity> outputPositionSimilarities = Similarity.processSimilarityFromPerson(inputPersonId.personId);
 		Collections.sort(outputPositionSimilarities, Collections.reverseOrder(OutputPositionSimilarity.Comparators.SIM));
-		
+		//Collections.sort(outputPositionSimilarities, OutputPositionSimilarity.Comparators.SIM);
+
 		
 		List<OutputPositionSimilarity> output = new ArrayList<>(); 
 		int i = 0;

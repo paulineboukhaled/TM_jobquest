@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 import org.codehaus.jackson.map.introspect.BasicClassIntrospector.GetterMethodFilter;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.FOAF;
@@ -18,6 +19,7 @@ import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.http.HTTPRepository;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,7 @@ import model.Job;
 import model.Person;
 import model.Position;
 import model.School;
+import model.SchoolPosition;
 import model.Skill;
 
 
@@ -98,43 +101,16 @@ public class SaveOnSesame {
 
 
 	public  URI saveCandidat(Person newCandidat){
-		RepositoryConnection conn = repo.getConnection();
-		try {
-			conn.begin();
-			Date date = new Date();	
-			String identifier = escape(newCandidat.getName()) + date.getTime();
-			URI candidatSesame = f.createURI(Parameter.NAMESPACE, identifier);
 
-			// Add statements to the rep John is a Person, John's name is John 
-			conn.add(candidatSesame, RDF.TYPE, FOAF.PERSON);
-			conn.add(candidatSesame, FOAF.NAME, f.createLiteral(newCandidat.getName(), XMLSchema.STRING));
-			conn.add(candidatSesame, FOAF.FIRST_NAME, f.createLiteral(newCandidat.getFirstname(), XMLSchema.STRING));
-			conn.add(candidatSesame, FOAF.BIRTHDAY, f.createLiteral(newCandidat.getBirthdate(), XMLSchema.STRING));
-			conn.add(candidatSesame, HAS_ADDRESS, f.createLiteral(newCandidat.getAddress(), XMLSchema.STRING));
-			conn.add(candidatSesame, HAS_NPA, f.createLiteral(newCandidat.getNpa(), XMLSchema.STRING));
-			conn.add(candidatSesame, HAS_CITY, f.createLiteral(newCandidat.getCity(), XMLSchema.STRING));
-			for(File file : newCandidat.getFiles()){
-				conn.add(candidatSesame, HAS_FILE, f.createLiteral(file.getId(), XMLSchema.STRING));
-			}
-			for(Skill s : newCandidat.getSkills()){
-				saveSkill(s, candidatSesame, conn, f);
-			}
-			for(Job j: newCandidat.getJobs()){
-				saveJob(j, candidatSesame, conn, f);
-			}
-			for(School school: newCandidat.getSchools()){
-				saveSchool(school, candidatSesame, conn, f);
-			}
-			conn.commit();	
-			return candidatSesame;
+		Date date = new Date();	
+		String identifier = escape(newCandidat.getName()) + date.getTime();
 
-		}finally{
-			conn.close();
-		} 
+		return saveCandidat(newCandidat, identifier);
+
 	}
 
 	private String escape(String name) {
-		return name.replaceAll(" ", "");
+		return name.replaceAll(" ", "").replaceAll("/", "_");
 	}
 
 	public void saveSkill(Skill skill, URI candidatIdentifier, RepositoryConnection conn, ValueFactory f){
@@ -177,14 +153,16 @@ public class SaveOnSesame {
 		String identifier = escape(school.getSchool()) + date.getTime();
 		URI schoolSesame = f.createURI(Parameter.NAMESPACE, identifier);
 		conn.add(candidatIdentifier, REQUIRE_SCHOOL, schoolSesame);
-		conn.add(schoolSesame, HAS_TITLE, f.createLiteral(school.getTitle(), XMLSchema.STRING));
+			conn.add(schoolSesame, HAS_TITLE, f.createLiteral(school.getTitle(), XMLSchema.STRING));
 		conn.add(schoolSesame, HAS_SCHOOL, f.createLiteral(school.getSchool(), XMLSchema.STRING));
 		conn.add(schoolSesame, HAS_SPECIALITY, f.createLiteral(school.getSpeciality(), XMLSchema.STRING));
 		conn.add(schoolSesame, HAS_START, f.createLiteral(school.getStart(), XMLSchema.STRING));
 		conn.add(schoolSesame, HAS_END, f.createLiteral(school.getEnd(), XMLSchema.STRING));
+		conn.add(schoolSesame, HAS_NPA, f.createLiteral(school.getNpa(), XMLSchema.STRING));
+		conn.add(schoolSesame, HAS_CITY, f.createLiteral(school.getCity(), XMLSchema.STRING));
 	}
 
-	public void savePositionSchool(School school, URI positionIdentifier, RepositoryConnection conn, ValueFactory f){
+	public void savePositionSchool(SchoolPosition school, URI positionIdentifier, RepositoryConnection conn, ValueFactory f){
 		Date date = new Date();
 		String identifier = escape(school.getSchool()) + date.getTime();
 		URI schoolSesame = f.createURI(Parameter.NAMESPACE, identifier);
@@ -192,44 +170,16 @@ public class SaveOnSesame {
 		conn.add(schoolSesame, HAS_TITLE, f.createLiteral(school.getTitle(), XMLSchema.STRING));
 		conn.add(schoolSesame, HAS_SCHOOL, f.createLiteral(school.getSchool(), XMLSchema.STRING));
 		conn.add(schoolSesame, HAS_SPECIALITY, f.createLiteral(school.getSpeciality(), XMLSchema.STRING));
+		conn.add(schoolSesame, HAS_NPA, f.createLiteral(school.getNpa(), XMLSchema.STRING));
+		conn.add(schoolSesame, HAS_CITY, f.createLiteral(school.getCity(), XMLSchema.STRING));
+
 
 	}
-
+	
 	public URI savePosition(Position newPosition){
-		RepositoryConnection conn = repo.getConnection();
-		try {
-			conn.begin();
-			Date date = new Date();	
-			String identifier = escape(newPosition.getPosition()) + date.getTime();
-
-			// Add statements to the rep John is a Person, John's name is John 
-			URI jobSesame = f.createURI(Parameter.NAMESPACE, identifier);
-			conn.add(jobSesame, RDF.TYPE, POSITION);
-
-			conn.add(jobSesame, HAS_POSITION, f.createLiteral(newPosition.getPosition(), XMLSchema.STRING));
-			conn.add(jobSesame, HAS_EMPLOYER, f.createLiteral(newPosition.getEmployer(), XMLSchema.STRING));
-			conn.add(jobSesame, HAS_DESCRIPTION, f.createLiteral(newPosition.getDescription(), XMLSchema.STRING));
-			conn.add(jobSesame, HAS_START, f.createLiteral(newPosition.getStart(), XMLSchema.STRING));
-			conn.add(jobSesame, HAS_END, f.createLiteral(newPosition.getEnd(), XMLSchema.STRING));
-			conn.add(jobSesame, HAS_NPA, f.createLiteral(newPosition.getNpa(), XMLSchema.STRING));
-			conn.add(jobSesame, HAS_CITY, f.createLiteral(newPosition.getCity(), XMLSchema.STRING));
-			for(Skill s : newPosition.getSkills()){
-				saveRequiredSkill(s, jobSesame, conn, f);
-			}
-
-			for(School school: newPosition.getSchools()){
-				savePositionSchool(school, jobSesame, conn, f);
-			}
-			conn.commit();	
-			return jobSesame;
-
-		}catch(Exception e) {
-			e.printStackTrace();
-			return null;
-		}finally{
-			conn.close();
-
-		} 
+		Date date = new Date();	
+		String identifier = escape(newPosition.getPosition()) + date.getTime();
+		return savePosition(newPosition, identifier);
 
 
 	}
@@ -268,7 +218,7 @@ public class SaveOnSesame {
 
 
 	public School getSchool(java.net.URI identifier) {
-		
+
 		/*CONNECTION OPEN*/
 		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
 		repo.initialize();
@@ -292,10 +242,56 @@ public class SaveOnSesame {
 				school.setSchool(value);
 			} else if(predicate.equals(HAS_SPECIALITY.stringValue())) {
 				school.setSpeciality(value);
+			} else if(predicate.equals(HAS_START.stringValue())) {
+				school.setStart(value);
+			} else if(predicate.equals(HAS_END.stringValue())) {
+				school.setEnd(value);
+			} else if(predicate.equals(HAS_NPA.stringValue())) {
+				school.setNpa(value);
+			} else if(predicate.equals(HAS_CITY.stringValue())) {
+				school.setCity(value);
 			}
 
 		}
-		
+
+		/*CONNECTION CLOSE*/
+		conn.close();
+		return school;
+	}
+	
+	public SchoolPosition getSchoolPosition(java.net.URI identifier) {
+
+		/*CONNECTION OPEN*/
+		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
+		repo.initialize();
+		RepositoryConnection conn = repo.getConnection();
+
+		String query="SELECT * WHERE { <"+identifier+"> ?p ?o }";
+		System.out.println(query);
+
+		TupleQuery result = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
+		TupleQueryResult res = result.evaluate();
+
+		School school = new School();
+
+		while(res.hasNext()) {
+			BindingSet actualRes = res.next();			
+			String predicate = actualRes.getValue("p").stringValue();
+			String value = actualRes.getValue("o").stringValue();
+			if(predicate.equals(HAS_TITLE.stringValue())) {
+				school.setTitle(value);
+			} else if(predicate.equals(HAS_SCHOOL.stringValue())) {
+				school.setSchool(value);
+			} else if(predicate.equals(HAS_SPECIALITY.stringValue())) {
+				school.setSpeciality(value);
+			} else if(predicate.equals(HAS_NPA.stringValue())) {
+				school.setNpa(value);
+			} else if(predicate.equals(HAS_CITY.stringValue())) {
+				school.setCity(value);
+			}
+
+		}
+
 		/*CONNECTION CLOSE*/
 		conn.close();
 		return school;
@@ -303,7 +299,7 @@ public class SaveOnSesame {
 
 
 	public Position getPosition(java.net.URI identifier) throws URISyntaxException {
-		
+
 		/*CONNECTION OPEN*/
 		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
 		repo.initialize();
@@ -341,8 +337,8 @@ public class SaveOnSesame {
 				job.getSkills().add(s);
 			} 
 			else if(predicate.equals(REQUIRE_SCHOOL.stringValue())) {
-				School s = getSchool(new java.net.URI(value));
-				job.getSchools().add(s);
+				SchoolPosition s = getSchoolPosition(new java.net.URI(value));
+				job.getSchoolPositions().add(s);
 			}
 		}
 
@@ -353,7 +349,7 @@ public class SaveOnSesame {
 
 	public ArrayList<Position> getPositions() throws URISyntaxException {
 		ArrayList<Position> positions = new ArrayList<>();
-		
+
 		/*CONNECTION OPEN*/
 		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
 		repo.initialize();
@@ -371,7 +367,7 @@ public class SaveOnSesame {
 			Position p = getPosition(new java.net.URI(uri));
 			positions.add(p);
 		}
-		
+
 		/*CONNECTION CLOSE*/
 		conn.close();
 		return positions;
@@ -455,13 +451,13 @@ public class SaveOnSesame {
 	public HashMap<String, Double> getHMPosition(String positionId) {
 		return getSingleHM(positionId);
 	}
-	
+
 	public HashMap<String, Double> getSingleHM(String Id) {
 		/*CONNECTION OPEN*/
 		Repository repo = new HTTPRepository(Parameter.SESAMESERVER, Parameter.REPOSITORYID);
 		repo.initialize();
 		RepositoryConnection conn = repo.getConnection();
-		
+
 		String query="SELECT ?n ?w WHERE { <"+Id+">  <"+REQUIRE_HM+"> ?s. ?s <"+HAS_NAME+"> ?n . ?s <"+HAS_WEIGHT+"> ?w}";
 		System.out.println(query);
 
@@ -542,7 +538,7 @@ public class SaveOnSesame {
 		try {
 			conn.begin();
 			Date date = new Date();	
-			
+
 			for(String hash : hashmapFinal.keySet()){
 				String idSkillComputed = escape(hash) + date.getTime();
 				URI uriSkillComputed = f.createURI(Parameter.NAMESPACE, idSkillComputed);
@@ -550,14 +546,135 @@ public class SaveOnSesame {
 				conn.add(uriSkillComputed, HAS_NAME,  f.createLiteral(hash, XMLSchema.STRING));
 				conn.add(uriSkillComputed, HAS_WEIGHT, f.createLiteral(hashmapFinal.get(hash)));
 
-				
+
 			}
 			conn.commit();	
 		}finally{
 			conn.close();
 		} 
-		
-		
+
+
+	}
+
+	public void deleteUserPosition(java.net.URI uri) {
+		// TODO Auto-generated method stub
+
+		RepositoryConnection conn = repo.getConnection();
+		try {
+			conn.begin();
+
+			URI candidatSesame = f.createURI(uri.toString());
+			RepositoryResult<Statement> statements = conn.getStatements(candidatSesame, null, null);
+
+
+//			ArrayList<Statement> ss = new ArrayList<>();
+			
+			while(statements.hasNext()) {
+
+				Statement statement = statements.next();
+
+
+//				URI obj = f.createURI(statement.getObject().toString());
+//				RepositoryResult<Statement> toDelete = conn.getStatements(obj, null, null);
+//				while(toDelete.hasNext()) {
+//					Statement s = statements.next();
+//					ss.add(s);
+//				}
+
+				conn.remove(statement);
+
+			}
+
+//			for (Statement statement : ss) {
+//				conn.remove(statement);
+//			}
+			conn.commit();	
+
+		}finally{
+			conn.close();
+		} 		
+
+	}
+
+	public static void main(String [] args) throws URISyntaxException {
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		loggerContext.stop();
+
+		SaveOnSesame sesame = new SaveOnSesame();
+
+		sesame.deleteUserPosition(new java.net.URI("http://jobquest/Dupont1453816453313"));
+	}
+
+	public URI saveCandidat(Person newCandidat, String id) {
+		RepositoryConnection conn = repo.getConnection();
+		try {
+			conn.begin();
+			Date date = new Date();	
+			String identifier = id;
+			URI candidatSesame = f.createURI(Parameter.NAMESPACE, identifier);
+
+			// Add statements to the rep John is a Person, John's name is John 
+			conn.add(candidatSesame, RDF.TYPE, FOAF.PERSON);
+			conn.add(candidatSesame, FOAF.NAME, f.createLiteral(newCandidat.getName(), XMLSchema.STRING));
+			conn.add(candidatSesame, FOAF.FIRST_NAME, f.createLiteral(newCandidat.getFirstname(), XMLSchema.STRING));
+			conn.add(candidatSesame, FOAF.BIRTHDAY, f.createLiteral(newCandidat.getBirthdate(), XMLSchema.STRING));
+			conn.add(candidatSesame, HAS_ADDRESS, f.createLiteral(newCandidat.getAddress(), XMLSchema.STRING));
+			conn.add(candidatSesame, HAS_NPA, f.createLiteral(newCandidat.getNpa(), XMLSchema.STRING));
+			conn.add(candidatSesame, HAS_CITY, f.createLiteral(newCandidat.getCity(), XMLSchema.STRING));
+			for(File file : newCandidat.getFiles()){
+				conn.add(candidatSesame, HAS_FILE, f.createLiteral(file.getId(), XMLSchema.STRING));
+			}
+			for(Skill s : newCandidat.getSkills()){
+				saveSkill(s, candidatSesame, conn, f);
+			}
+			for(Job j: newCandidat.getJobs()){
+				saveJob(j, candidatSesame, conn, f);
+			}
+			for(School school: newCandidat.getSchools()){
+				saveSchool(school, candidatSesame, conn, f);
+			}
+			conn.commit();	
+			return candidatSesame;
+
+		}finally{
+			conn.close();
+		} 		
+	}
+
+	public URI savePosition(Position newPosition, String id) {
+		RepositoryConnection conn = repo.getConnection();
+		try {
+			conn.begin();
+			String identifier = id;
+
+			// Add statements to the rep John is a Person, John's name is John 
+			URI jobSesame = f.createURI(Parameter.NAMESPACE, identifier);
+			conn.add(jobSesame, RDF.TYPE, POSITION);
+
+			conn.add(jobSesame, HAS_POSITION, f.createLiteral(newPosition.getPosition(), XMLSchema.STRING));
+			conn.add(jobSesame, HAS_EMPLOYER, f.createLiteral(newPosition.getEmployer(), XMLSchema.STRING));
+			conn.add(jobSesame, HAS_DESCRIPTION, f.createLiteral(newPosition.getDescription(), XMLSchema.STRING));
+			conn.add(jobSesame, HAS_START, f.createLiteral(newPosition.getStart(), XMLSchema.STRING));
+			conn.add(jobSesame, HAS_END, f.createLiteral(newPosition.getEnd(), XMLSchema.STRING));
+			conn.add(jobSesame, HAS_NPA, f.createLiteral(newPosition.getNpa(), XMLSchema.STRING));
+			conn.add(jobSesame, HAS_CITY, f.createLiteral(newPosition.getCity(), XMLSchema.STRING));
+			for(Skill s : newPosition.getSkills()){
+				saveRequiredSkill(s, jobSesame, conn, f);
+			}
+
+			for(SchoolPosition school: newPosition.getSchoolPositions()){
+				savePositionSchool(school, jobSesame, conn, f);
+			}
+			conn.commit();	
+			return jobSesame;
+
+		}catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}finally{
+			conn.close();
+
+		} 
 	}
 
 
