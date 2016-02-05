@@ -240,8 +240,9 @@ public class SkillsWeight2 {
 		HashMap<String, Double> obj = new HashMap<>();
 
 		for(Skill skill:skills){
+			int depth = 6;
 			double weight = 1.0+Math.log(Math.pow(Double.parseDouble(skill.getLevel()),Double.parseDouble(skill.getYearOfExperience())));
-			HashMap<String, SkillCompute> data1 = SkillsWeight2.influenced(skill.getName(), weight, 4);
+			HashMap<String, SkillCompute> data1 = SkillsWeight2.influenced(skill.getName(), weight, depth);
 			for (String key : data1.keySet()) {
 				SkillCompute skillCompute = data1.get(key);
 				if(obj.containsKey(key)) {
@@ -251,7 +252,7 @@ public class SkillsWeight2 {
 				}
 			}		
 
-			HashMap<String, SkillCompute> data2 = SkillsWeight2.influencedBy(skill.getName(), weight, 4);
+			HashMap<String, SkillCompute> data2 = SkillsWeight2.influencedBy(skill.getName(), weight, depth);
 			for (String key : data2.keySet()) {
 				SkillCompute skillCompute = data2.get(key);
 				if(obj.containsKey(key)) {

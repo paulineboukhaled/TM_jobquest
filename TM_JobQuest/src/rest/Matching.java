@@ -72,7 +72,8 @@ public class Matching {
 			i++;
 		}
 
-		return Response.status(200).entity(gson.toJson(output)).build();
+		String o = gson.toJson(output);
+		return Response.status(200).entity(o).build();
 	}
 	
 	
