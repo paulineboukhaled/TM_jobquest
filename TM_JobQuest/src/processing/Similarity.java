@@ -50,6 +50,8 @@ public class Similarity {
 		}
 
 		double sim = CosineSimilarity.cosineSimilarity(matrice[0], matrice[1]);
+		if(sim== Double.NaN)
+			sim = 0;
 		return sim;		
 		
 		//return distanceEuclidienne(matrice[0], matrice[1]);
@@ -99,7 +101,10 @@ public class Similarity {
 		HashMap<String, HashMap<String, Double>> hPositions = sesame.getAllHMPositions();
 
 		List<OutputPositionSimilarity> similarities = getSimUserAndPositions(hUser, hPositions);
-
+		for (OutputPositionSimilarity outputPositionSimilarity : similarities) {
+			if(Double.isNaN(outputPositionSimilarity.similarity))
+				outputPositionSimilarity.similarity = 0;
+		}
 		return similarities;
 	}
 

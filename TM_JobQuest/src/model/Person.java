@@ -44,9 +44,21 @@ public class Person {
     @Expose
     private List<File> files = new ArrayList<File>();
     
+    @SerializedName("fakeSkills")
+    @Expose
+    private List<Skill> fakeSkills = new ArrayList<Skill>();
     
     
-    public String getUri() {
+    
+    public List<Skill> getFakeSkills() {
+		return fakeSkills;
+	}
+
+	public void setFakeSkills(List<Skill> fakeSkills) {
+		this.fakeSkills = fakeSkills;
+	}
+
+	public String getUri() {
 		return uri;
 	}
 

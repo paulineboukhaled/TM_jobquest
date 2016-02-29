@@ -15,6 +15,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQueryResult;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.sparql.SPARQLRepository;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -103,15 +109,39 @@ public class PDFWeigth {
 					gson = new GsonBuilder().create();
 					ResponseSpotlight resultSpotlight = gson.fromJson(result, ResponseSpotlight.class);
 					for(ResponseSpotlight.Resource r : resultSpotlight.getResources()){
-						String uri = r.getURI();
-						uri = uri.replace("http://dbpedia.org/resource/", "");
-						uri = uri.replace("_", " ");
-						keywords.add(uri);
-						if(frequency.containsKey(uri)){
-							frequency.put(uri, frequency.get(uri)+1);
-						}else{
-							frequency.put(uri, (long) 1);
+						
+						
+						StringBuilder qb = new StringBuilder();
+						qb.append("PREFIX onto: <http://dbpedia.org/ontology/> \n");
+						qb.append("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n");
+						qb.append("SELECT DISTINCT ?name \n");
+						qb.append("WHERE { <"+r.getURI()+"> foaf:name ?name.  }  \n");
+						
+						System.out.println(qb.toString());
+						
+						Repository repo = new SPARQLRepository("http://dbpedia.org/sparql");
+						repo.initialize();
+						RepositoryConnection conn = repo.getConnection();
+						TupleQueryResult result2 = conn.prepareTupleQuery(QueryLanguage.SPARQL, qb.toString()).evaluate(); 
+						result2 = conn.prepareTupleQuery(QueryLanguage.SPARQL, qb.toString()).evaluate(); 
+
+						if(result2.hasNext()){
+							BindingSet bs = result2.next(); 
+							String n = bs.getValue("name").toString();
+							
+							keywords.add(n);
+							if(frequency.containsKey(n)){
+								frequency.put(n, frequency.get(n)+1);
+							}else{
+								frequency.put(n, (long) 1);
+							}
 						}
+						conn.close();
+						repo.shutDown();
+//						String uri = r.getURI();
+//						uri = uri.replace("http://dbpedia.org/resource/", "");
+//						uri = uri.replace("_", " ");
+						
 					}
 				}
 			}
